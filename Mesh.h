@@ -7,8 +7,16 @@
 class Mesh
 {
 public:
-	Mesh(const std::vector<float>& vertices, const std::vector<unsigned int>& indices, bool hasColors = false);
-	Mesh(const std::vector<float>& vertices, bool hasColors = false);
+	enum VertexDataComponent
+	{
+		// in order of components in vertex data
+		Color = 0x1,
+		TexCoord = 0x2,
+		Normal = 0x4
+	};
+
+	Mesh(const std::vector<float>& vertices, const std::vector<unsigned int>& indices, unsigned int components = 0);
+	Mesh(const std::vector<float>& vertices, unsigned int components = 0);
 	~Mesh();
 
 	void Bind() const;

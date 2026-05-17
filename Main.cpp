@@ -4,6 +4,7 @@
 #include "InputManager.h"
 #include "ShaderProgram.h"
 #include "Mesh.h"
+#include "Texture.h"
 
 int main() {
 	WindowManager& windowManager = WindowManager::getInstance();
@@ -14,10 +15,11 @@ int main() {
 	ShaderProgram shaderProgram("./Res/Shaders/shader.vert", "./Res/Shaders/shader.frag");
 
 	float vertices[] = {
-		0.5f, 0.5f, 0.0f, 1.0f, 0.0f, 0.0f, // top right
-		0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 0.0f, // bottom right
-		-0.5f, -0.5f, 0.0f, 0.0f, 0.0f, 1.0f, // bottom left
-		-0.5f, 0.5f, 0.0f, 1.0f, 1.0f, 1.0f // top left
+		// positions		 // colors			// tex coords
+		0.5f, 0.5f, 0.0f,	1.0f, 0.0f, 0.0f,	1.0f, 1.0f,		// top right
+		0.5f, -0.5f, 0.0f,	0.0f, 1.0f, 0.0f,	1.0f, 0.0f,		// bottom right
+		-0.5f, -0.5f, 0.0f, 0.0f, 0.0f, 1.0f,	0.0f, 0.0f,		// bottom left
+		-0.5f, 0.5f, 0.0f,	1.0f, 1.0f, 1.0f,	0.0f, 1.0f		// top left
 	};
 
 	unsigned int indices[] = {
@@ -28,21 +30,22 @@ int main() {
 	Mesh rect(
 		std::vector<float>(std::begin(vertices), std::end(vertices)), 
 		std::vector<unsigned int>(std::begin(indices), std::end(indices)),
-		true
+		Mesh::Color | Mesh::TexCoord
 	);
 
 	float vertices2[] = {
-		// positions
-		 // colors
-		0.5f, -0.5f, 0.0f, 1.0f, 0.0f, 0.0f, // bottom right
-		-0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 0.0f, // bottom left
-		0.0f, 0.5f, 0.0f, 0.0f, 0.0f, 1.0f // top
+		// positions		// colors
+		0.5f, -0.5f, 0.0f,	1.0f, 0.0f, 0.0f,		// bottom right
+		-0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 0.0f,		// bottom left
+		0.0f, 0.5f, 0.0f,	0.0f, 0.0f, 1.0f		// top
 	};
 	
 	Mesh triangle(
 		std::vector<float>(std::begin(vertices2), std::end(vertices2)),
-		true
+		Mesh::Color
 	);
+
+	Texture brickTexture("./Res/Textures/brick_texture.png");
 
 	// render loop
 	while (!windowManager.windowShouldClose()) {
@@ -54,14 +57,17 @@ int main() {
 		glClear(GL_COLOR_BUFFER_BIT);
 		shaderProgram.Bind();
 
-		shaderProgram.SetUniform("uBrightness", 0.4f);
+		shaderProgram.SetUniform("uBrightness", 1.0f);
+		shaderProgram.SetUniform("uTexture", 0);
+
+		brickTexture.Bind(0);
 
 		rect.Bind();
 		rect.Draw();
 		rect.Unbind();
 
 		triangle.Bind();
-		triangle.Draw();
+		//triangle.Draw();
 		triangle.Unbind();
 
 		shaderProgram.Unbind();

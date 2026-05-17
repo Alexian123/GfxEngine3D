@@ -2,7 +2,7 @@
 
 #include <glad/glad.h>
 
-Mesh::Mesh(const std::vector<float>& vertices, const std::vector<unsigned int>& indices, bool hasColors)
+Mesh::Mesh(const std::vector<float>& vertices, const std::vector<unsigned int>& indices, unsigned int components)
 	: m_indexCount(indices.size())
 {
 	// create VAO
@@ -13,47 +13,54 @@ Mesh::Mesh(const std::vector<float>& vertices, const std::vector<unsigned int>& 
 	// create VBO
 	m_VBO.WriteData(vertices.data(), vertices.size() * sizeof(float), GL_STATIC_DRAW);
 
-	int stride = hasColors ? 6 * sizeof(float) : 3 * sizeof(float);
+	// calculate stride and vertex count
+	int stride = 3; // position
+	if (components & Color) {
+		stride += 3;
+	}
+	if (components & TexCoord) {
+		stride += 2;
+	}
+	if (components & Normal) {
+		stride += 3;
+	}
+	stride *= sizeof(float);
 	m_vertexCount = vertices.size() / (stride / sizeof(float));	// size / floats per vertex
+	int offset = 0;
 
-	// vertex position attribute
-	setVertexAttribute(0, 3, GL_FLOAT, GL_FALSE, stride, 0);
+	// position attribute
+	setVertexAttribute(0, 3, GL_FLOAT, GL_FALSE, stride, offset);
+	offset += 3 * sizeof(float);
 
-	// vertex color attribute
-	if (hasColors) {
-		setVertexAttribute(1, 3, GL_FLOAT, GL_FALSE, stride, 3 * sizeof(float));
+	// color attribute
+	if (components & Color) {
+		setVertexAttribute(1, 3, GL_FLOAT, GL_FALSE, stride, offset);
+		offset += 3 * sizeof(float);
 	}
 
-	// vertex normal attribute
+	// tex coord attribute
+	if (components & TexCoord) {
+		setVertexAttribute(2, 2, GL_FLOAT, GL_FALSE, stride, offset);
+		offset += 2 * sizeof(float);
+	}
+
+	// normal attribute
+	if (components & Normal) {
+		setVertexAttribute(3, 3, GL_FLOAT, GL_FALSE, stride, offset);
+		offset += 3 * sizeof(float);
+	}
 
 	// create EBO
-	m_EBO.WriteData(indices.data(), indices.size() * sizeof(unsigned int), GL_STATIC_DRAW);
+	if (indices.size() > 0) {
+		m_EBO.WriteData(indices.data(), indices.size() * sizeof(unsigned int), GL_STATIC_DRAW);
+	}
 
 	Unbind();
 }
 
-Mesh::Mesh(const std::vector<float>& vertices, bool hasColors)
+Mesh::Mesh(const std::vector<float>& vertices, unsigned int components)
+	: Mesh(vertices, std::vector<unsigned int>(), components)	// empty indices vector
 {
-	// create VAO
-	glGenVertexArrays(1, &m_VAO);
-
-	Bind();
-
-	// create VBO
-	m_VBO.WriteData(vertices.data(), vertices.size() * sizeof(float), GL_STATIC_DRAW);
-
-	int stride = hasColors ? 6 * sizeof(float) : 3 * sizeof(float);
-	m_vertexCount = vertices.size() / (stride / sizeof(float));
-
-	// vertex position attribute
-	setVertexAttribute(0, 3, GL_FLOAT, GL_FALSE, stride, 0);
-
-	// vertex color attribute
-	if (hasColors) {
-		setVertexAttribute(1, 3, GL_FLOAT, GL_FALSE, stride, 3 * sizeof(float));
-	}
-
-	Unbind();
 }
 
 Mesh::~Mesh()
