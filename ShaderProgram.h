@@ -9,6 +9,7 @@ public:
 	void Bind() const;
 	void Unbind() const;
 
+	ShaderProgram() = delete;
 	ShaderProgram(const ShaderProgram& other) = delete;
 	ShaderProgram& operator=(const ShaderProgram& other) = delete;
 
