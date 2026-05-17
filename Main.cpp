@@ -11,27 +11,7 @@ int main() {
 
 	InputManager& inputManager = InputManager::getInstance();
 
-	const char* vertexShaderSource = 
-		"#version 330 core\n"
-		"layout (location = 0) in vec3 aPos;\n"
-		"layout (location = 1) in vec3 aColor;\n"
-		"out vec4 vColor;\n"
-		"void main()\n"
-		"{\n"
-		"   vColor = vec4(aColor, 1.0f);\n"
-		"   gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0);\n"
-		"}";
-
-	const char* fragmentShaderSource = 
-		"#version 330 core\n"
-		"in vec4 vColor;\n"
-		"out vec4 FragColor;\n"
-		"void main()\n"
-		"{\n"
-		"   FragColor = vColor;\n"
-		"}";
-
-	ShaderProgram shaderProgram(vertexShaderSource, fragmentShaderSource);
+	ShaderProgram shaderProgram("./Res/Shaders/shader.vert", "./Res/Shaders/shader.frag");
 
 	float vertices[] = {
 		0.5f, 0.5f, 0.0f, 1.0f, 0.0f, 0.0f, // top right
@@ -73,6 +53,8 @@ int main() {
 		glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT);
 		shaderProgram.Bind();
+
+		shaderProgram.SetUniform("uBrightness", 0.4f);
 
 		rect.Bind();
 		rect.Draw();

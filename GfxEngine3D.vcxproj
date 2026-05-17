@@ -148,6 +148,15 @@
     <ClInclude Include="ShaderProgram.h" />
     <ClInclude Include="WindowManager.h" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="Res\Shaders\shader.frag" />
+    <None Include="Res\Shaders\shader.vert" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Res\**\*">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
