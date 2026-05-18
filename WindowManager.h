@@ -22,6 +22,7 @@ protected:
 	WindowManager();
 
 private:
+public:
 	GLFWwindow* m_window;
 	bool m_initialized;
 };

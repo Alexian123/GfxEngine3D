@@ -1,11 +1,10 @@
 #include <iostream>
-
+#include <chrono>
 
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/vec3.hpp>
 #include <glm/mat4x4.hpp>
 #include <glm/gtc/quaternion.hpp>
-
 
 #include "WindowManager.h"
 #include "InputManager.h"
@@ -41,7 +40,9 @@ int main() {
 	model = glm::scale(model, scale);
 
 	glm::mat4 view = glm::mat4(1.0f);
-	view = glm::translate(view, glm::vec3(0.0f, 0.0f, -3.0f));
+	glm::vec3 cameraPos = glm::vec3(0.0f, 0.0f, 3.0f);
+	glm::vec3 cameraFront = glm::vec3(0.0f, 0.0f, -1.0f);
+	glm::vec3 cameraUp = glm::vec3(0.0f, 1.0f, 0.0f);
 
 	glm::mat4 projection;
 	projection = glm::perspective(glm::radians(45.0f), 800.0f / 600.0f, 0.1f,
@@ -50,9 +51,30 @@ int main() {
 	glEnable(GL_DEPTH_TEST);
 
 	// render loop
+	auto lastTime = std::chrono::high_resolution_clock::now();
+	auto currentTime = lastTime;
 	while (!windowManager.windowShouldClose()) {
+		currentTime = std::chrono::high_resolution_clock::now();
+		std::chrono::duration<float> elapsed = currentTime - lastTime;
+		float deltaTime = elapsed.count();
+		lastTime = currentTime;
+
 		// process input
 		inputManager.processInput();
+
+		const float cameraSpeed = 2.5f * deltaTime;
+		if (glfwGetKey(windowManager.m_window, GLFW_KEY_W) == GLFW_PRESS)
+			cameraPos += cameraSpeed * cameraFront;
+		if (glfwGetKey(windowManager.m_window, GLFW_KEY_S) == GLFW_PRESS)
+			cameraPos -= cameraSpeed * cameraFront;
+		if (glfwGetKey(windowManager.m_window, GLFW_KEY_A) == GLFW_PRESS)
+			cameraPos -= glm::normalize(glm::cross(cameraFront, cameraUp)) *
+			cameraSpeed;
+		if (glfwGetKey(windowManager.m_window, GLFW_KEY_D) == GLFW_PRESS)
+			cameraPos += glm::normalize(glm::cross(cameraFront, cameraUp)) *
+			cameraSpeed;
+
+		view = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
 
 		// render frame
 		glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
