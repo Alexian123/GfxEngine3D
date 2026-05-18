@@ -1,5 +1,9 @@
 #pragma once
 
+#include "Texture.h"
+
+#include <glm/mat4x4.hpp>
+
 #include <string>
 #include <unordered_map>
 
@@ -15,6 +19,11 @@ public:
 	void SetUniform(const std::string& name, float value);
 	void SetUniform(const std::string& name, int value);
 	void SetUniform(const std::string& name, bool value);
+	void SetUniform(const std::string& name, const glm::mat4& value);
+
+	void SetDefaultVertexAttribute(int index, float x, float y) const;
+	void SetDefaultVertexAttribute(int index, float x, float y, float z) const;
+	void SetDefaultVertexAttribute(int index, float x, float y, float z, float w) const;
 
 	ShaderProgram() = delete;
 	ShaderProgram(const ShaderProgram& other) = delete;

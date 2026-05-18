@@ -23,6 +23,9 @@ public:
 	void Unbind() const;
 	void Draw() const;
 
+	size_t GetVertexCount() const { return m_vertexCount; }
+	size_t GetIndexCount() const { return m_indexCount; }
+
 	Mesh() = delete;
 	Mesh(const Mesh&) = delete;
 	Mesh& operator=(const Mesh&) = delete;
@@ -42,4 +45,6 @@ private:
 		unsigned int stride,
 		unsigned int offset
 	) const;
+
+	void disableVertexAttibute(unsigned int index) const;
 };

@@ -7,8 +7,9 @@ out vec4 FragColor;
 
 uniform float uBrightness;
 uniform sampler2D uTexture;
+uniform sampler2D uTexture2;
 
 void main()
 {
-   FragColor = texture(uTexture, vTexCoord) * uBrightness;
+   FragColor = mix(texture(uTexture, vTexCoord), texture(uTexture2, vTexCoord), 0.3) * vColor * uBrightness;
 };

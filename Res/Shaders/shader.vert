@@ -7,9 +7,13 @@ layout (location = 2) in vec2 aTexCoord;
 out vec4 vColor;
 out vec2 vTexCoord;
 
+uniform mat4 uModel;
+uniform mat4 uView;
+uniform mat4 uProjection;
+
 void main()
 {
-   gl_Position = vec4(aPos, 1.0);
+   gl_Position = uProjection * uView * uModel * vec4(aPos, 1.0);
    vColor = vec4(aColor, 1.0f);
    vTexCoord = aTexCoord;
 }

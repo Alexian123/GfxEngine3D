@@ -5,6 +5,7 @@
 #include <sstream>
 
 #include <glad/glad.h>
+#include <glm/gtc/type_ptr.hpp>
 
 ShaderProgram::ShaderProgram(const char* vertexShaderPath, const char* fragmentShaderPath)
 {
@@ -85,6 +86,26 @@ void ShaderProgram::SetUniform(const std::string& name, int value)
 void ShaderProgram::SetUniform(const std::string& name, bool value)
 {
 	SetUniform(name, static_cast<int>(value));
+}
+
+void ShaderProgram::SetUniform(const std::string& name, const glm::mat4& value)
+{
+	glUniformMatrix4fv(GetUniformLocation(name), 1, GL_FALSE, glm::value_ptr(value));
+}
+
+void ShaderProgram::SetDefaultVertexAttribute(int index, float x, float y) const
+{
+	glVertexAttrib2f(index, x, y);
+}
+
+void ShaderProgram::SetDefaultVertexAttribute(int index, float x, float y, float z) const
+{
+	glVertexAttrib3f(index, x, y, z);
+}
+
+void ShaderProgram::SetDefaultVertexAttribute(int index, float x, float y, float z, float w) const
+{
+	glVertexAttrib4f(index, x, y, z, w);
 }
 
 unsigned int ShaderProgram::CompileShader(unsigned int type, const char* source)

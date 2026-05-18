@@ -37,17 +37,26 @@ Mesh::Mesh(const std::vector<float>& vertices, const std::vector<unsigned int>& 
 		setVertexAttribute(1, 3, GL_FLOAT, GL_FALSE, stride, offset);
 		offset += 3 * sizeof(float);
 	}
+	else {
+		disableVertexAttibute(1);
+	}
 
 	// tex coord attribute
 	if (components & TexCoord) {
 		setVertexAttribute(2, 2, GL_FLOAT, GL_FALSE, stride, offset);
 		offset += 2 * sizeof(float);
 	}
+	else {
+		disableVertexAttibute(2);
+	}
 
 	// normal attribute
 	if (components & Normal) {
 		setVertexAttribute(3, 3, GL_FLOAT, GL_FALSE, stride, offset);
 		offset += 3 * sizeof(float);
+	}
+	else {
+		disableVertexAttibute(3);
 	}
 
 	// create EBO
@@ -97,7 +106,12 @@ void Mesh::setVertexAttribute(
 	unsigned int offset
 ) const
 {
+	glEnableVertexAttribArray(index);
 	glVertexAttribPointer(index, size, type, normalized, stride, 
 		reinterpret_cast<void*>(static_cast<uintptr_t>(offset)));
-	glEnableVertexAttribArray(index);
+}
+
+void Mesh::disableVertexAttibute(unsigned int index) const
+{
+	glDisableVertexAttribArray(index);
 }

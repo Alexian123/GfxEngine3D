@@ -1,5 +1,12 @@
 #include <iostream>
 
+
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/vec3.hpp>
+#include <glm/mat4x4.hpp>
+#include <glm/gtc/quaternion.hpp>
+
+
 #include "WindowManager.h"
 #include "InputManager.h"
 #include "ShaderProgram.h"
@@ -13,39 +20,34 @@ int main() {
 	InputManager& inputManager = InputManager::getInstance();
 
 	ShaderProgram shaderProgram("./Res/Shaders/shader.vert", "./Res/Shaders/shader.frag");
+	shaderProgram.SetDefaultVertexAttribute(1, 1.0f, 1.0f, 1.0f);	// default color white
 
-	float vertices[] = {
-		// positions		 // colors			// tex coords
-		0.5f, 0.5f, 0.0f,	1.0f, 0.0f, 0.0f,	1.0f, 1.0f,		// top right
-		0.5f, -0.5f, 0.0f,	0.0f, 1.0f, 0.0f,	1.0f, 0.0f,		// bottom right
-		-0.5f, -0.5f, 0.0f, 0.0f, 0.0f, 1.0f,	0.0f, 0.0f,		// bottom left
-		-0.5f, 0.5f, 0.0f,	1.0f, 1.0f, 1.0f,	0.0f, 1.0f		// top left
-	};
-
-	unsigned int indices[] = {
-		0, 1, 3, // first triangle
-		1, 2, 3 // second triangle
-	};
+	float vertices[] = { -0.5f, -0.5f, -0.5f, 0.0f, 0.0f, 0.5f, -0.5f, -0.5f, 1.0f, 0.0f, 0.5f, 0.5f, -0.5f, 1.0f, 1.0f, 0.5f, 0.5f, -0.5f, 1.0f, 1.0f, -0.5f, 0.5f, -0.5f, 0.0f, 1.0f, -0.5f, -0.5f, -0.5f, 0.0f, 0.0f, -0.5f, -0.5f, 0.5f, 0.0f, 0.0f, 0.5f, -0.5f, 0.5f, 1.0f, 0.0f, 0.5f, 0.5f, 0.5f, 1.0f, 1.0f, 0.5f, 0.5f, 0.5f, 1.0f, 1.0f, -0.5f, 0.5f, 0.5f, 0.0f, 1.0f, -0.5f, -0.5f, 0.5f, 0.0f, 0.0f, -0.5f, 0.5f, 0.5f, 1.0f, 0.0f, -0.5f, 0.5f, -0.5f, 1.0f, 1.0f, -0.5f, -0.5f, -0.5f, 0.0f, 1.0f, -0.5f, -0.5f, -0.5f, 0.0f, 1.0f, -0.5f, -0.5f, 0.5f, 0.0f, 0.0f, -0.5f, 0.5f, 0.5f, 1.0f, 0.0f, 0.5f, 0.5f, 0.5f, 1.0f, 0.0f, 0.5f, 0.5f, -0.5f, 1.0f, 1.0f, 0.5f, -0.5f, -0.5f, 0.0f, 1.0f, 0.5f, -0.5f, -0.5f, 0.0f, 1.0f, 0.5f, -0.5f, 0.5f, 0.0f, 0.0f, 0.5f, 0.5f, 0.5f, 1.0f, 0.0f, -0.5f, -0.5f, -0.5f, 0.0f, 1.0f, 0.5f, -0.5f, -0.5f, 1.0f, 1.0f, 0.5f, -0.5f, 0.5f, 1.0f, 0.0f, 0.5f, -0.5f, 0.5f, 1.0f, 0.0f, -0.5f, -0.5f, 0.5f, 0.0f, 0.0f, -0.5f, -0.5f, -0.5f, 0.0f, 1.0f, -0.5f, 0.5f, -0.5f, 0.0f, 1.0f, 0.5f, 0.5f, -0.5f, 1.0f, 1.0f, 0.5f, 0.5f, 0.5f, 1.0f, 0.0f, 0.5f, 0.5f, 0.5f, 1.0f, 0.0f, -0.5f, 0.5f, 0.5f, 0.0f, 0.0f, -0.5f, 0.5f, -0.5f, 0.0f, 1.0f };
 
 	Mesh rect(
-		std::vector<float>(std::begin(vertices), std::end(vertices)), 
-		std::vector<unsigned int>(std::begin(indices), std::end(indices)),
-		Mesh::Color | Mesh::TexCoord
-	);
-
-	float vertices2[] = {
-		// positions		// colors
-		0.5f, -0.5f, 0.0f,	1.0f, 0.0f, 0.0f,		// bottom right
-		-0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 0.0f,		// bottom left
-		0.0f, 0.5f, 0.0f,	0.0f, 0.0f, 1.0f		// top
-	};
-	
-	Mesh triangle(
-		std::vector<float>(std::begin(vertices2), std::end(vertices2)),
-		Mesh::Color
+		std::vector<float>(std::begin(vertices), std::end(vertices)),
+		Mesh::TexCoord
 	);
 
 	Texture brickTexture("./Res/Textures/brick_texture.png");
+	Texture patternTexture("./Res/Textures/pattern_texture.png");
+
+	glm::vec3 position = glm::vec3(0.0f);
+	glm::quat rotation = glm::angleAxis(glm::radians(45.0f), glm::vec3(0.0f, 1.0f, 1.0f));
+	glm::vec3 scale = glm::vec3(1.0f);
+	glm::mat4 model = glm::mat4(1.0f);
+	model = glm::translate(model, position);
+	model = glm::mat4_cast(rotation) * model;
+	model = glm::scale(model, scale);
+
+	glm::mat4 view = glm::mat4(1.0f);
+	view = glm::translate(view, glm::vec3(0.0f, 0.0f, -3.0f));
+
+	glm::mat4 projection;
+	projection = glm::perspective(glm::radians(45.0f), 800.0f / 600.0f, 0.1f,
+		100.0f);
+
+	glEnable(GL_DEPTH_TEST);
 
 	// render loop
 	while (!windowManager.windowShouldClose()) {
@@ -54,21 +56,23 @@ int main() {
 
 		// render frame
 		glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
-		glClear(GL_COLOR_BUFFER_BIT);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		shaderProgram.Bind();
 
 		shaderProgram.SetUniform("uBrightness", 1.0f);
 		shaderProgram.SetUniform("uTexture", 0);
+		shaderProgram.SetUniform("uTexture2", 1);
+
+		shaderProgram.SetUniform("uModel", model);
+		shaderProgram.SetUniform("uView", view);
+		shaderProgram.SetUniform("uProjection", projection);
 
 		brickTexture.Bind(0);
+		patternTexture.Bind(1);
 
 		rect.Bind();
 		rect.Draw();
 		rect.Unbind();
-
-		triangle.Bind();
-		//triangle.Draw();
-		triangle.Unbind();
 
 		shaderProgram.Unbind();
 

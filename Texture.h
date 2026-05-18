@@ -6,7 +6,12 @@ public:
 	Texture(const char* path);
 	~Texture();
 
-	void Bind(unsigned int slot = 0) const;
+	unsigned int GetID() const { return m_id; }
+	int GetWidth() const { return m_width; }
+	int GetHeight() const { return m_height; }
+	int GetChannels() const { return m_channels; }
+
+	void Bind(int slot) const;
 	void Unbind() const;
 
 	Texture(const Texture&) = delete;
