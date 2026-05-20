@@ -16,6 +16,7 @@ int main() {
 	WindowManager& windowManager = WindowManager::GetInstance();
 	windowManager.Init(800, 600, "MainWindow");
 	windowManager.SetClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+	windowManager.SetCursorEnabled(false);
 
 	InputManager& inputManager = InputManager::GetInstance();
 
@@ -44,16 +45,18 @@ int main() {
 	glm::vec3 cameraPos = glm::vec3(0.0f, 0.0f, 3.0f);
 	glm::vec3 cameraFront = glm::vec3(0.0f, 0.0f, -1.0f);
 	glm::vec3 cameraUp = glm::vec3(0.0f, 1.0f, 0.0f);
+	float yaw = -89.0f;
+	float pitch = 0.0f;
 
 	glm::mat4 projection;
-	projection = glm::perspective(glm::radians(45.0f), 800.0f / 600.0f, 0.1f,
-		100.0f);
+	projection = glm::perspective(glm::radians(45.0f), 800.0f / 600.0f, 0.1f, 100.0f);
 
 	glEnable(GL_DEPTH_TEST);
 
 	// render loop
 	auto lastTime = std::chrono::high_resolution_clock::now();
 	auto currentTime = lastTime;
+	auto lastMousePos = inputManager.GetMousePosition();
 	while (!windowManager.WindowShouldClose()) {
 		// calculate delta time
 		currentTime = std::chrono::high_resolution_clock::now();
@@ -63,9 +66,33 @@ int main() {
 
 		// process events and input
 		windowManager.ProcessEvents();
-		
+		auto currentMousePos = inputManager.GetMousePosition();
+
 		if (inputManager.IsKeyPressed(InputManager::Key_Escape)) {
 			windowManager.SetWindowShouldClose();
+		}
+
+		if (inputManager.IsMouseButtonPressed(InputManager::Mouse_Right)) {
+			float mouseDeltaX = currentMousePos.first - lastMousePos.first;
+			float mouseDeltaY = lastMousePos.second - currentMousePos.second;	// reversed since y-coordinates go from bottom to top
+
+			const float sensitivity = 0.1f;
+			mouseDeltaX *= sensitivity;
+			mouseDeltaY *= sensitivity;
+
+			yaw += mouseDeltaX;
+			pitch += mouseDeltaY;
+
+			if (pitch > 89.0f)
+				pitch = 89.0f;
+			if (pitch < -89.0f)
+				pitch = -89.0f;
+
+			glm::vec3 direction;
+			direction.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
+			direction.y = sin(glm::radians(pitch));
+			direction.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
+			cameraFront = glm::normalize(direction);
 		}
 
 		const float cameraSpeed = 2.5f * deltaTime;
@@ -77,6 +104,10 @@ int main() {
 			cameraPos -= glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
 		if (inputManager.IsKeyPressed(InputManager::Key_D))
 			cameraPos += glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
+		if (inputManager.IsKeyPressed(InputManager::Key_Space))
+			cameraPos += cameraSpeed * cameraUp;
+		if (inputManager.IsKeyPressed(InputManager::Key_LCtrl))
+			cameraPos -= cameraSpeed * cameraUp;
 
 		view = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
 
@@ -103,6 +134,8 @@ int main() {
 
 		// update window
 		windowManager.Update();
+
+		lastMousePos = currentMousePos;
 	}
 
 	// terminate

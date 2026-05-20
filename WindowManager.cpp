@@ -28,6 +28,15 @@ static void key_callback(GLFWwindow* window, int key, int scancode, int action, 
 	case GLFW_KEY_D:
 		inputKey = InputManager::Key_D;
 		break;
+	case GLFW_KEY_LEFT_SHIFT:
+		inputKey = InputManager::Key_LShift;
+		break;
+	case GLFW_KEY_LEFT_CONTROL:
+		inputKey = InputManager::Key_LCtrl;
+		break;
+	case GLFW_KEY_SPACE:
+		inputKey = InputManager::Key_Space;
+		break;
 	default:
 		return;	// ignore other keys
 	}
