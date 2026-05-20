@@ -13,10 +13,11 @@
 #include "Texture.h"
 
 int main() {
-	WindowManager& windowManager = WindowManager::getInstance();
-	windowManager.init(800, 600, "MainWindow");
+	WindowManager& windowManager = WindowManager::GetInstance();
+	windowManager.Init(800, 600, "MainWindow");
+	windowManager.SetClearColor(0.2f, 0.3f, 0.3f, 1.0f);
 
-	InputManager& inputManager = InputManager::getInstance();
+	InputManager& inputManager = InputManager::GetInstance();
 
 	ShaderProgram shaderProgram("./Res/Shaders/shader.vert", "./Res/Shaders/shader.frag");
 	shaderProgram.SetDefaultVertexAttribute(1, 1.0f, 1.0f, 1.0f);	// default color white
@@ -53,32 +54,34 @@ int main() {
 	// render loop
 	auto lastTime = std::chrono::high_resolution_clock::now();
 	auto currentTime = lastTime;
-	while (!windowManager.windowShouldClose()) {
+	while (!windowManager.WindowShouldClose()) {
+		// calculate delta time
 		currentTime = std::chrono::high_resolution_clock::now();
 		std::chrono::duration<float> elapsed = currentTime - lastTime;
 		float deltaTime = elapsed.count();
 		lastTime = currentTime;
 
-		// process input
-		inputManager.processInput();
+		// process events and input
+		windowManager.ProcessEvents();
+		
+		if (inputManager.IsKeyPressed(InputManager::Key_Escape)) {
+			windowManager.SetWindowShouldClose();
+		}
 
 		const float cameraSpeed = 2.5f * deltaTime;
-		if (glfwGetKey(windowManager.m_window, GLFW_KEY_W) == GLFW_PRESS)
+		if (inputManager.IsKeyPressed(InputManager::Key_W))
 			cameraPos += cameraSpeed * cameraFront;
-		if (glfwGetKey(windowManager.m_window, GLFW_KEY_S) == GLFW_PRESS)
+		if (inputManager.IsKeyPressed(InputManager::Key_S))
 			cameraPos -= cameraSpeed * cameraFront;
-		if (glfwGetKey(windowManager.m_window, GLFW_KEY_A) == GLFW_PRESS)
-			cameraPos -= glm::normalize(glm::cross(cameraFront, cameraUp)) *
-			cameraSpeed;
-		if (glfwGetKey(windowManager.m_window, GLFW_KEY_D) == GLFW_PRESS)
-			cameraPos += glm::normalize(glm::cross(cameraFront, cameraUp)) *
-			cameraSpeed;
+		if (inputManager.IsKeyPressed(InputManager::Key_A))
+			cameraPos -= glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
+		if (inputManager.IsKeyPressed(InputManager::Key_D))
+			cameraPos += glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
 
 		view = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
 
 		// render frame
-		glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		windowManager.ClearScreen();
 		shaderProgram.Bind();
 
 		shaderProgram.SetUniform("uBrightness", 1.0f);
@@ -99,10 +102,10 @@ int main() {
 		shaderProgram.Unbind();
 
 		// update window
-		windowManager.update();
+		windowManager.Update();
 	}
 
 	// terminate
-	windowManager.cleanup();
+	windowManager.Cleanup();
 	return 0;
 }

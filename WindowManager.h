@@ -1,29 +1,38 @@
 #pragma once
 
+#include <utility>
+
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
 class WindowManager
 {
 public:
-	WindowManager(const WindowManager&) = delete;
-	WindowManager& operator=(const WindowManager&) = delete;
+	~WindowManager();
 
-	static WindowManager& getInstance();
+	static WindowManager& GetInstance();
 
-	void init(int width, int height, const char* title);
-	void update() const;
-	bool windowShouldClose() const;
-	void cleanup() const;
+	void Init(int width, int height, const char* title);
+	void ClearScreen() const;
+	void ProcessEvents();
+	void Update() const;
+	bool WindowShouldClose() const;
+	void Cleanup();
 
-	friend class InputManager;
+	void SetCursorEnabled(bool enabled) const;
+	void SetClearColor(float r, float g, float b, float a) const;
+	void SetWindowShouldClose() const;
+
+	auto GetWindowDimensions() const { return std::make_pair(m_width, m_height); }
 
 protected:
 	WindowManager();
+	WindowManager(const WindowManager&) = delete;
+	WindowManager& operator=(const WindowManager&) = delete;
 
 private:
-public:
 	GLFWwindow* m_window;
 	bool m_initialized;
+	int m_width, m_height;
 };
 
