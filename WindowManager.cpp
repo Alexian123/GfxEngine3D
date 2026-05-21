@@ -79,6 +79,12 @@ static void mouse_button_callback(GLFWwindow* window, int button, int action, in
 	}
 }
 
+static void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
+{
+	InputManager& inputManager = InputManager::GetInstance();
+	inputManager.OnMouseScroll(static_cast<float>(xoffset), static_cast<float>(yoffset));
+}
+
 WindowManager::WindowManager() 
 	: m_window(nullptr), m_initialized(false), m_width(0), m_height(0)
 {
@@ -133,6 +139,7 @@ void WindowManager::Init(int width, int height, const char* title)
 	glfwSetKeyCallback(m_window, key_callback);
 	glfwSetCursorPosCallback(m_window, mouse_position_callback);
 	glfwSetMouseButtonCallback(m_window, mouse_button_callback);
+	glfwSetScrollCallback(m_window, scroll_callback);
 
 	m_initialized = true;
 }

@@ -48,15 +48,15 @@ int main() {
 	float yaw = -89.0f;
 	float pitch = 0.0f;
 
+	float fov = 45.0f;
 	glm::mat4 projection;
-	projection = glm::perspective(glm::radians(45.0f), 800.0f / 600.0f, 0.1f, 100.0f);
+	projection = glm::perspective(glm::radians(fov), 800.0f / 600.0f, 0.1f, 100.0f);
 
 	glEnable(GL_DEPTH_TEST);
 
 	// render loop
 	auto lastTime = std::chrono::high_resolution_clock::now();
 	auto currentTime = lastTime;
-	auto lastMousePos = inputManager.GetMousePosition();
 	while (!windowManager.WindowShouldClose()) {
 		// calculate delta time
 		currentTime = std::chrono::high_resolution_clock::now();
@@ -65,48 +65,55 @@ int main() {
 		lastTime = currentTime;
 
 		// process events and input
+		inputManager.BeginFrame();
 		windowManager.ProcessEvents();
-		auto currentMousePos = inputManager.GetMousePosition();
 
-		if (inputManager.IsKeyPressed(InputManager::Key_Escape)) {
+		if (inputManager.IsKeyDown(InputManager::Key_Escape)) {
 			windowManager.SetWindowShouldClose();
 		}
 
-		if (inputManager.IsMouseButtonPressed(InputManager::Mouse_Right)) {
-			float mouseDeltaX = currentMousePos.first - lastMousePos.first;
-			float mouseDeltaY = lastMousePos.second - currentMousePos.second;	// reversed since y-coordinates go from bottom to top
+		auto scrollOffset = inputManager.GetMouseScrollOffset();
+		if (scrollOffset.y != 0.0f) {
+			const float zoomSensitivity = 1.0f;
+			fov -= scrollOffset.y * zoomSensitivity;
+			if (fov < 1.0f)
+				fov = 1.0f;
+			if (fov > 45.0f)
+				fov = 45.0f;
+			projection = glm::perspective(glm::radians(fov), 800.0f / 600.0f, 0.1f, 100.0f);
+		}
+
+		if (inputManager.IsMouseButtonDown(InputManager::Mouse_Right)) {
+			const auto& mouseDelta = inputManager.GetMouseDelta();
 
 			const float sensitivity = 0.1f;
-			mouseDeltaX *= sensitivity;
-			mouseDeltaY *= sensitivity;
-
-			yaw += mouseDeltaX;
-			pitch += mouseDeltaY;
+			yaw += (mouseDelta.x * sensitivity);
+			pitch += (mouseDelta.y * sensitivity);
 
 			if (pitch > 89.0f)
 				pitch = 89.0f;
 			if (pitch < -89.0f)
 				pitch = -89.0f;
-
-			glm::vec3 direction;
-			direction.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
-			direction.y = sin(glm::radians(pitch));
-			direction.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
-			cameraFront = glm::normalize(direction);
 		}
 
+		glm::vec3 direction;
+		direction.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
+		direction.y = sin(glm::radians(pitch));
+		direction.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
+		cameraFront = glm::normalize(direction);
+
 		const float cameraSpeed = 2.5f * deltaTime;
-		if (inputManager.IsKeyPressed(InputManager::Key_W))
+		if (inputManager.IsKeyDown(InputManager::Key_W))
 			cameraPos += cameraSpeed * cameraFront;
-		if (inputManager.IsKeyPressed(InputManager::Key_S))
+		if (inputManager.IsKeyDown(InputManager::Key_S))
 			cameraPos -= cameraSpeed * cameraFront;
-		if (inputManager.IsKeyPressed(InputManager::Key_A))
+		if (inputManager.IsKeyDown(InputManager::Key_A))
 			cameraPos -= glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
-		if (inputManager.IsKeyPressed(InputManager::Key_D))
+		if (inputManager.IsKeyDown(InputManager::Key_D))
 			cameraPos += glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
-		if (inputManager.IsKeyPressed(InputManager::Key_Space))
+		if (inputManager.IsKeyDown(InputManager::Key_Space))
 			cameraPos += cameraSpeed * cameraUp;
-		if (inputManager.IsKeyPressed(InputManager::Key_LCtrl))
+		if (inputManager.IsKeyDown(InputManager::Key_LCtrl))
 			cameraPos -= cameraSpeed * cameraUp;
 
 		view = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
@@ -134,8 +141,6 @@ int main() {
 
 		// update window
 		windowManager.Update();
-
-		lastMousePos = currentMousePos;
 	}
 
 	// terminate

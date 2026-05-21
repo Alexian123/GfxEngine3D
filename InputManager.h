@@ -1,7 +1,8 @@
 #pragma once
 
 #include <cstdint>
-#include <utility>
+
+#include <glm/vec2.hpp>
 
 class InputManager
 {
@@ -29,17 +30,22 @@ public:
 
 	static InputManager& GetInstance();
 
+	void BeginFrame();
+
 	void OnKeyPressed(Key key);
 	void OnKeyReleased(Key key);
 
 	void OnMousePositionChanged(float x, float y);
 	void OnMouseButtonPressed(MouseButton button);
 	void OnMouseButtonReleased(MouseButton button);
+	void OnMouseScroll(float xoffset, float yoffset);
 
-	bool IsKeyPressed(Key key) const { return (m_keyPressedMask & key) != 0; }
-	bool IsMouseButtonPressed(MouseButton button) const { return m_mouseBtnPressedMask & button; };
+	bool IsKeyDown(Key key) const { return (m_keyDownMask & key) != 0; }
+	bool IsMouseButtonDown(MouseButton button) const { return m_mouseBtnDownMask & button; };
 
-	auto GetMousePosition() const { return std::make_pair(m_mouseX, m_mouseY); }
+	const glm::vec2& GetMousePosition() const { return m_mousePosition; };
+	const glm::vec2& GetMouseDelta() const { return m_mouseDelta; }
+	const glm::vec2& GetMouseScrollOffset() const { return m_mouseScrollOffset; }
 
 protected:
 	InputManager();
@@ -47,7 +53,10 @@ protected:
 	InputManager& operator=(const InputManager&) = delete;
 
 private:
-	std::uint64_t m_keyPressedMask = 0;
-	std::uint8_t m_mouseBtnPressedMask = 0;
-	float m_mouseX = 0.0f, m_mouseY = 0.0f;
+	std::uint64_t m_keyDownMask = 0;
+	std::uint8_t m_mouseBtnDownMask = 0;
+	glm::vec2 m_mousePosition{ 0.0f, 0.0f };
+	glm::vec2 m_mouseDelta{ 0.0f, 0.0f };
+	glm::vec2 m_mouseScrollOffset{ 0.0f, 0.0f };
+	bool m_firstMouseUpdate = true;
 };
