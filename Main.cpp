@@ -11,6 +11,7 @@
 #include "ShaderProgram.h"
 #include "Mesh.h"
 #include "Texture.h"
+#include "FlyCamera.h"
 
 int main() {
 	WindowManager& windowManager = WindowManager::GetInstance();
@@ -41,16 +42,7 @@ int main() {
 	model = glm::mat4_cast(rotation) * model;
 	model = glm::scale(model, scale);
 
-	glm::mat4 view = glm::mat4(1.0f);
-	glm::vec3 cameraPos = glm::vec3(0.0f, 0.0f, 3.0f);
-	glm::vec3 cameraFront = glm::vec3(0.0f, 0.0f, -1.0f);
-	glm::vec3 cameraUp = glm::vec3(0.0f, 1.0f, 0.0f);
-	float yaw = -89.0f;
-	float pitch = 0.0f;
-
-	float fov = 45.0f;
-	glm::mat4 projection;
-	projection = glm::perspective(glm::radians(fov), 800.0f / 600.0f, 0.1f, 100.0f);
+	FlyCamera camera(45.0f, 800.0f / 600.0f, 0.1f, 100.0f);
 
 	glEnable(GL_DEPTH_TEST);
 
@@ -66,7 +58,7 @@ int main() {
 
 		// process events and input
 		inputManager.BeginFrame();
-		windowManager.ProcessEvents();
+		windowManager.ProcessEvents();	
 
 		if (inputManager.IsKeyDown(InputManager::Key_Escape)) {
 			windowManager.SetWindowShouldClose();
@@ -74,49 +66,29 @@ int main() {
 
 		auto scrollOffset = inputManager.GetMouseScrollOffset();
 		if (scrollOffset.y != 0.0f) {
-			const float zoomSensitivity = 1.0f;
-			fov -= scrollOffset.y * zoomSensitivity;
-			if (fov < 1.0f)
-				fov = 1.0f;
-			if (fov > 45.0f)
-				fov = 45.0f;
-			projection = glm::perspective(glm::radians(fov), 800.0f / 600.0f, 0.1f, 100.0f);
+			camera.Zoom(-scrollOffset.y);
 		}
 
 		if (inputManager.IsMouseButtonDown(InputManager::Mouse_Right)) {
 			const auto& mouseDelta = inputManager.GetMouseDelta();
-
 			const float sensitivity = 0.1f;
-			yaw += (mouseDelta.x * sensitivity);
-			pitch += (mouseDelta.y * sensitivity);
-
-			if (pitch > 89.0f)
-				pitch = 89.0f;
-			if (pitch < -89.0f)
-				pitch = -89.0f;
+			camera.RotateYaw(mouseDelta.x * sensitivity);
+			camera.RotatePitch(mouseDelta.y * sensitivity);
 		}
-
-		glm::vec3 direction;
-		direction.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
-		direction.y = sin(glm::radians(pitch));
-		direction.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
-		cameraFront = glm::normalize(direction);
 
 		const float cameraSpeed = 2.5f * deltaTime;
 		if (inputManager.IsKeyDown(InputManager::Key_W))
-			cameraPos += cameraSpeed * cameraFront;
+			camera.MoveZ(cameraSpeed);
 		if (inputManager.IsKeyDown(InputManager::Key_S))
-			cameraPos -= cameraSpeed * cameraFront;
+			camera.MoveZ(-cameraSpeed);
 		if (inputManager.IsKeyDown(InputManager::Key_A))
-			cameraPos -= glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
+			camera.MoveX(-cameraSpeed);
 		if (inputManager.IsKeyDown(InputManager::Key_D))
-			cameraPos += glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
+			camera.MoveX(cameraSpeed);
 		if (inputManager.IsKeyDown(InputManager::Key_Space))
-			cameraPos += cameraSpeed * cameraUp;
+			camera.MoveY(cameraSpeed);
 		if (inputManager.IsKeyDown(InputManager::Key_LCtrl))
-			cameraPos -= cameraSpeed * cameraUp;
-
-		view = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
+			camera.MoveY(-cameraSpeed);
 
 		// render frame
 		windowManager.ClearScreen();
@@ -127,8 +99,8 @@ int main() {
 		shaderProgram.SetUniform("uTexture2", 1);
 
 		shaderProgram.SetUniform("uModel", model);
-		shaderProgram.SetUniform("uView", view);
-		shaderProgram.SetUniform("uProjection", projection);
+		shaderProgram.SetUniform("uView", camera.GetViewMatrix());
+		shaderProgram.SetUniform("uProjection", camera.GetProjectionMatrix());
 
 		brickTexture.Bind(0);
 		patternTexture.Bind(1);

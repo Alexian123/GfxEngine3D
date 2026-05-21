@@ -133,6 +133,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="FlyCamera.cpp" />
     <ClCompile Include="GLBuffer.cpp" />
     <ClCompile Include="InputManager.cpp" />
     <ClCompile Include="Main.cpp" />
@@ -143,6 +144,8 @@
     <ClCompile Include="WindowManager.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="FlyCamera.h" />
+    <ClInclude Include="ICamera.h" />
     <ClInclude Include="GLBuffer.h" />
     <ClInclude Include="InputManager.h" />
     <ClInclude Include="Mesh.h" />
