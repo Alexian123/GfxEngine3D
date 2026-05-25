@@ -13,6 +13,12 @@ namespace GfxEngine3D
 		UpdateMatricesIfNeeded();
 	}
 
+	Entity::Entity() 
+		: m_id(GetNextID()), m_mesh(nullptr), m_texture(nullptr), m_material(nullptr)
+	{
+		UpdateMatricesIfNeeded();
+	}
+
 	const glm::mat4& Entity::GetModelMatrix()
 	{
 		UpdateMatricesIfNeeded();
@@ -41,6 +47,11 @@ namespace GfxEngine3D
 	{
 		m_scale = scale;
 		m_matricesDirty = true;
+	}
+
+	void Entity::SetScale(float scale)
+	{
+		SetScale(glm::vec3(scale));
 	}
 
 	unsigned int Entity::GetNextID()

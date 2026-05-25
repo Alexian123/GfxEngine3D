@@ -33,8 +33,6 @@ uniform vec3 uViewPos;
 
 void main()
 {
-	//FragColor = mix(texture(uTexture, vTexCoord), texture(uTexture2, vTexCoord), 0.3) * vColor * uBrightness;
-
 	vec3 norm = normalize(vNormal);
 	vec3 viewDir = normalize(uViewPos - vWorldPos);
 
@@ -57,8 +55,7 @@ void main()
 		specular += uLights[i].specular * (spec * uMaterial.specular);
 	}
 
-	
-
 	vec3 result = ambient + diffuse + specular;
-	FragColor = vec4(result, 1.0);
+	FragColor = texture(uTexture, vTexCoord) * vec4(result, 1.0);
+	//FragColor = vec4(result, 1.0);
 };

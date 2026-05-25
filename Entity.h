@@ -22,7 +22,6 @@ namespace GfxEngine3D
 
 		~Entity() = default;
 
-		Entity() = delete;
 		Entity(const Entity&) = delete;
 		Entity& operator=(const Entity&) = delete;
 
@@ -43,6 +42,10 @@ namespace GfxEngine3D
 		void SetPosition(const glm::vec3& position);
 		void SetRotation(const glm::vec3& rotation);
 		void SetScale(const glm::vec3& scale);
+		void SetScale(float scale);
+
+	protected:
+		Entity();
 
 	private:
 		unsigned int m_id;
