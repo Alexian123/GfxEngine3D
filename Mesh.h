@@ -4,62 +4,65 @@
 
 #include "GLBuffer.h"
 
-struct VertexData
+namespace GfxEngine3D
 {
-	float position[3];
-	float color[3];
-	float texCoord[2];
-	float normal[3];
-};
-
-class Mesh
-{
-public:
-	enum VertexAttribute
+	struct VertexData
 	{
-		// in order of attributes in vertex data
-		Position = 0x0,
-		Color = 0x1,
-		TexCoord = 0x2,
-		Normal = 0x4
+		float position[3];
+		float color[3];
+		float texCoord[2];
+		float normal[3];
 	};
 
-	Mesh(const std::vector<VertexData>& vertices, const std::vector<unsigned int>& indices, unsigned int attributes = Position);
-	Mesh(const std::vector<VertexData>& vertices, unsigned int attributes = Position);
-	~Mesh();
+	class Mesh
+	{
+	public:
+		enum VertexAttribute
+		{
+			// in order of attributes in vertex data
+			Position = 0x0,
+			Color = 0x1,
+			TexCoord = 0x2,
+			Normal = 0x4
+		};
 
-	void Bind() const;
-	void Unbind() const;
-	void Draw() const;
+		Mesh(const std::vector<VertexData>& vertices, const std::vector<unsigned int>& indices, unsigned int attributes = Position);
+		Mesh(const std::vector<VertexData>& vertices, unsigned int attributes = Position);
+		~Mesh();
 
-	size_t GetVertexCount() const { return m_vertexCount; }
-	size_t GetIndexCount() const { return m_indexCount; }
-	unsigned int GetAttributes() const { return m_attributes; }
+		void Bind() const;
+		void Unbind() const;
+		void Draw() const;
 
-	Mesh() = delete;
-	Mesh(const Mesh&) = delete;
-	Mesh& operator=(const Mesh&) = delete;
+		int GetVertexCount() const { return m_vertexCount; }
+		int GetIndexCount() const { return m_indexCount; }
+		unsigned int GetAttributes() const { return m_attributes; }
 
-private:
-	size_t m_vertexCount = 0;
-	size_t m_indexCount = 0;
-	unsigned int m_VAO = 0;
-	GLBuffer m_VBO{ GLBuffer::ArrayBuffer };
-	GLBuffer m_EBO{ GLBuffer::ElementArrayBuffer };
-	unsigned int m_attributes = Position;
+		Mesh() = delete;
+		Mesh(const Mesh&) = delete;
+		Mesh& operator=(const Mesh&) = delete;
 
-	std::vector<float> BuildVertexBuffer(const std::vector<VertexData>& vertices, unsigned int attributes) const;
+	private:
+		int m_vertexCount = 0;
+		int m_indexCount = 0;
+		unsigned int m_VAO = 0;
+		GLBuffer m_VBO{ GLBuffer::ArrayBuffer };
+		GLBuffer m_EBO{ GLBuffer::ElementArrayBuffer };
+		unsigned int m_attributes = Position;
 
-	unsigned int CalculateStride(unsigned int attributes) const;
+		std::vector<float> BuildVertexBuffer(const std::vector<VertexData>& vertices, unsigned int attributes) const;
 
-	void setVertexAttribute(
-		unsigned int index,
-		unsigned int size,
-		unsigned int type,
-		bool normalized,
-		unsigned int stride,
-		unsigned int offset
-	) const;
+		unsigned int CalculateStride(unsigned int attributes) const;
 
-	void disableVertexAttibute(unsigned int index) const;
-};
+		void setVertexAttribute(
+			unsigned int index,
+			unsigned int size,
+			unsigned int type,
+			bool normalized,
+			unsigned int stride,
+			unsigned int offset
+		) const;
+
+		void disableVertexAttibute(unsigned int index) const;
+	};
+}

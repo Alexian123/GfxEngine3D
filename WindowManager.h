@@ -5,35 +5,38 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
-class WindowManager
+namespace GfxEngine3D
 {
-public:
-	~WindowManager();
+	class WindowManager
+	{
+	public:
+		~WindowManager();
 
-	static WindowManager& GetInstance();
+		static WindowManager& GetInstance();
 
-	void Init(int width, int height, const char* title);
-	void ClearScreen() const;
-	void ProcessEvents();
-	void Update() const;
-	bool WindowShouldClose() const;
-	void Cleanup();
+		void Init(int width, int height, const char* title);
+		void ClearScreen() const;
+		void ProcessEvents();
+		void Update() const;
+		bool WindowShouldClose() const;
+		void Cleanup();
 
-	void SetCursorEnabled(bool enabled) const;
-	void SetClearColor(float r, float g, float b, float a) const;
-	void SetWindowShouldClose() const;
+		void SetCursorEnabled(bool enabled) const;
+		void SetClearColor(float r, float g, float b, float a) const;
+		void SetWindowShouldClose() const;
 
-	auto GetWindowDimensions() const { return std::make_pair(m_width, m_height); }
-	float GetAspectRatio() const { return static_cast<float>(m_width) / m_height; }
+		auto GetWindowDimensions() const { return std::make_pair(m_width, m_height); }
+		float GetAspectRatio() const { return static_cast<float>(m_width) / m_height; }
 
-protected:
-	WindowManager();
-	WindowManager(const WindowManager&) = delete;
-	WindowManager& operator=(const WindowManager&) = delete;
+	protected:
+		WindowManager();
+		WindowManager(const WindowManager&) = delete;
+		WindowManager& operator=(const WindowManager&) = delete;
 
-private:
-	GLFWwindow* m_window;
-	bool m_initialized;
-	int m_width, m_height;
-};
+	private:
+		GLFWwindow* m_window;
+		bool m_initialized;
+		int m_width, m_height;
+	};
+}
 

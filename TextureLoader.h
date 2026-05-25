@@ -6,24 +6,26 @@
 #include <string>
 #include <memory>
 
-class TextureLoader
+namespace GfxEngine3D
 {
-public:
-	~TextureLoader();
+	class TextureLoader
+	{
+	public:
+		~TextureLoader();
 
-	static TextureLoader& GetInstance();
+		static TextureLoader& GetInstance();
 
-	std::shared_ptr<Texture> LoadTexture(const std::string& name, const std::string& path);
+		std::shared_ptr<Texture> LoadTexture(const std::string& name, const std::string& path);
 
-	TextureLoader(const TextureLoader&) = delete;
-	TextureLoader& operator=(const TextureLoader&) = delete;
+		TextureLoader(const TextureLoader&) = delete;
+		TextureLoader& operator=(const TextureLoader&) = delete;
 
-protected:
-	TextureLoader();
+	protected:
+		TextureLoader();
 
-private:
-	std::unordered_map<std::string, std::shared_ptr<Texture>> m_textureCache;
+	private:
+		std::unordered_map<std::string, std::shared_ptr<Texture>> m_textureCache;
 
-	std::shared_ptr<Texture> GetTextureFromCache(const std::string& name);
-};
-
+		std::shared_ptr<Texture> GetTextureFromCache(const std::string& name);
+	};
+}

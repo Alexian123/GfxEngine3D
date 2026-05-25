@@ -6,24 +6,26 @@
 #include <string>
 #include <memory>
 
-class MeshLoader
+namespace GfxEngine3D
 {
-public:
-	~MeshLoader();
+	class MeshLoader
+	{
+	public:
+		~MeshLoader();
 
-	static MeshLoader& GetInstance();
+		static MeshLoader& GetInstance();
 
-	std::shared_ptr<Mesh> LoadCube(const std::string& name, unsigned int attributes = Mesh::Position);
+		std::shared_ptr<Mesh> LoadCube(const std::string& name, unsigned int attributes = Mesh::Position);
 
-	MeshLoader(const MeshLoader&) = delete;
-	MeshLoader& operator=(const MeshLoader&) = delete;
+		MeshLoader(const MeshLoader&) = delete;
+		MeshLoader& operator=(const MeshLoader&) = delete;
 
-protected:
-	MeshLoader();
+	protected:
+		MeshLoader();
 
-private:
-	std::unordered_map<std::string, std::shared_ptr<Mesh>> m_meshCache;
+	private:
+		std::unordered_map<std::string, std::shared_ptr<Mesh>> m_meshCache;
 
-	std::shared_ptr<Mesh> GetMeshFromCache(const std::string& name);
-};
-
+		std::shared_ptr<Mesh> GetMeshFromCache(const std::string& name);
+	};
+}

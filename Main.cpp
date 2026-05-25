@@ -15,6 +15,8 @@
 #include "MeshLoader.h"
 #include "TextureLoader.h"
 
+using namespace GfxEngine3D;
+
 int main() {
 	WindowManager& windowManager = WindowManager::GetInstance();
 	windowManager.Init(800, 600, "MainWindow");
@@ -47,7 +49,12 @@ int main() {
 	glm::vec3 lightPos(1.2f, 1.0f, 2.0f);
 	glm::mat4 lightSourceModelMatrix = glm::mat4(1.0f);
 	lightSourceModelMatrix = glm::translate(lightSourceModelMatrix, lightPos);
-	lightSourceModelMatrix = glm::scale(lightSourceModelMatrix, glm::vec3(0.2f));
+	lightSourceModelMatrix = glm::scale(lightSourceModelMatrix, glm::vec3(0.1f));
+
+	glm::vec3 lightPos2(1.0f, 2.0f, 2.0f);
+	glm::mat4 lightSourceModelMatrix2 = glm::mat4(1.0f);
+	lightSourceModelMatrix2 = glm::translate(lightSourceModelMatrix2, lightPos2);
+	lightSourceModelMatrix2 = glm::scale(lightSourceModelMatrix2, glm::vec3(0.05f));
 
 	FlyCamera camera(45.0f, windowManager.GetAspectRatio(), 0.1f, 100.0f);
 
@@ -115,10 +122,18 @@ int main() {
 		shaderProgram.SetUniform("uMaterial.diffuse", glm::vec3(1.0f, 0.5f, 0.31f));
 		shaderProgram.SetUniform("uMaterial.specular", glm::vec3(0.5f, 0.5f, 0.5f));
 		shaderProgram.SetUniform("uMaterial.shininess", 32.0f);
+
+		shaderProgram.SetUniform("uNumLights", 2);
+
 		shaderProgram.SetUniform("uLights[0].position", lightPos);
 		shaderProgram.SetUniform("uLights[0].ambient", glm::vec3(0.2f, 0.2f, 0.2f));
 		shaderProgram.SetUniform("uLights[0].diffuse", glm::vec3(0.5f, 0.5f, 0.5f)); // darkened
 		shaderProgram.SetUniform("uLights[0].specular", glm::vec3(1.0f, 1.0f, 1.0f));
+
+		shaderProgram.SetUniform("uLights[1].position", lightPos2);
+		shaderProgram.SetUniform("uLights[1].ambient", glm::vec3(0.2f, 0.2f, 0.2f));
+		shaderProgram.SetUniform("uLights[1].diffuse", glm::vec3(0.5f, 0.5f, 0.5f)); // darkened
+		shaderProgram.SetUniform("uLights[1].specular", glm::vec3(1.0f, 1.0f, 1.0f));
 
 		brickTexture->Bind(0);
 		patternTexture->Bind(1);
@@ -132,12 +147,16 @@ int main() {
 		// render light source cube
 		lightSourceShaaderProgram.Bind();
 
+		lightSourceCube->Bind();
+
 		lightSourceShaaderProgram.SetUniform("uModel", lightSourceModelMatrix);
 		lightSourceShaaderProgram.SetUniform("uView", camera.GetViewMatrix());
 		lightSourceShaaderProgram.SetUniform("uProjection", camera.GetProjectionMatrix());
-
-		lightSourceCube->Bind();
 		lightSourceCube->Draw();
+
+		lightSourceShaaderProgram.SetUniform("uModel", lightSourceModelMatrix2);
+		lightSourceCube->Draw();
+
 		lightSourceCube->Unbind();
 
 		lightSourceShaaderProgram.Unbind();
