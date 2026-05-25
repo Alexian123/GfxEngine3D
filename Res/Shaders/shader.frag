@@ -25,10 +25,7 @@ in vec3 vWorldPos;
 
 out vec4 FragColor;
 
-uniform float uBrightness;
 uniform sampler2D uTexture;
-uniform sampler2D uTexture2;
-
 uniform Material uMaterial;
 uniform int uNumLights;
 uniform Light uLights[MAX_NUM_LIGHTS];

@@ -14,6 +14,8 @@
 #include "FlyCamera.h"
 #include "MeshLoader.h"
 #include "TextureLoader.h"
+#include "Material.h"
+#include "Entity.h"
 
 using namespace GfxEngine3D;
 
@@ -34,17 +36,15 @@ int main() {
 
 	TextureLoader& textureLoader = TextureLoader::GetInstance();
 	std::shared_ptr<Texture> brickTexture = textureLoader.LoadTexture("brick", "./Res/Textures/brick_texture.png");
-	std::shared_ptr<Texture> patternTexture = textureLoader.LoadTexture("pattern", "./Res/Textures/pattern_texture.png");
 
-	glm::vec3 position = glm::vec3(0.0f);
-	glm::vec3 rotation = glm::vec3(0.0f, 0.0f, 0.0f);
-	glm::vec3 scale = glm::vec3(1.0f);
-	glm::mat4 cubeModelMatrix = glm::translate(glm::mat4(1.0f), position)
-		* glm::rotate(glm::mat4(1.0f), glm::radians(rotation.y), glm::vec3(0, 1, 0))		// YXZ rotation
-		* glm::rotate(glm::mat4(1.0f), glm::radians(rotation.x), glm::vec3(1, 0, 0))
-		* glm::rotate(glm::mat4(1.0f), glm::radians(rotation.z), glm::vec3(0, 0, 1))
-		* glm::scale(glm::mat4(1.0f), scale);
-	glm::mat4 cubeNormalMatrix = glm::mat4(glm::mat3(glm::transpose(glm::inverse(cubeModelMatrix))));
+	std::shared_ptr<Material> material1 = std::make_shared<Material>(
+		glm::vec3(1.0f, 0.5f, 0.31f), // ambient
+		glm::vec3(1.0f, 0.5f, 0.31f), // diffuse
+		glm::vec3(0.5f, 0.5f, 0.5f),  // specular
+		32.0f						  // shininess
+	);
+
+	Entity cubeEntity(cube, brickTexture, material1);
 
 	glm::vec3 lightPos(1.2f, 1.0f, 2.0f);
 	glm::mat4 lightSourceModelMatrix = glm::mat4(1.0f);
@@ -112,16 +112,15 @@ int main() {
 
 		shaderProgram.SetUniform("uBrightness", 1.0f);
 		shaderProgram.SetUniform("uTexture", 0);
-		shaderProgram.SetUniform("uTexture2", 1);
-		shaderProgram.SetUniform("uModel", cubeModelMatrix);
+		shaderProgram.SetUniform("uModel", cubeEntity.GetModelMatrix());
 		shaderProgram.SetUniform("uView", camera.GetViewMatrix());
 		shaderProgram.SetUniform("uProjection", camera.GetProjectionMatrix());
-		shaderProgram.SetUniform("uNormal", cubeNormalMatrix);
+		shaderProgram.SetUniform("uNormal", cubeEntity.GetNormalMatrix());
 		shaderProgram.SetUniform("uViewPos", camera.GetPosition());
-		shaderProgram.SetUniform("uMaterial.ambient", glm::vec3(1.0f, 0.5f, 0.31f));
-		shaderProgram.SetUniform("uMaterial.diffuse", glm::vec3(1.0f, 0.5f, 0.31f));
-		shaderProgram.SetUniform("uMaterial.specular", glm::vec3(0.5f, 0.5f, 0.5f));
-		shaderProgram.SetUniform("uMaterial.shininess", 32.0f);
+		shaderProgram.SetUniform("uMaterial.ambient", cubeEntity.GetMaterial()->GetAmbient());
+		shaderProgram.SetUniform("uMaterial.diffuse", cubeEntity.GetMaterial()->GetDiffuse());
+		shaderProgram.SetUniform("uMaterial.specular", cubeEntity.GetMaterial()->GetSpecular());
+		shaderProgram.SetUniform("uMaterial.shininess", cubeEntity.GetMaterial()->GetShininess());
 
 		shaderProgram.SetUniform("uNumLights", 2);
 
@@ -135,12 +134,11 @@ int main() {
 		shaderProgram.SetUniform("uLights[1].diffuse", glm::vec3(0.5f, 0.5f, 0.5f)); // darkened
 		shaderProgram.SetUniform("uLights[1].specular", glm::vec3(1.0f, 1.0f, 1.0f));
 
-		brickTexture->Bind(0);
-		patternTexture->Bind(1);
+		cubeEntity.GetTexture()->Bind(0);
 
-		cube->Bind();
-		cube->Draw();
-		cube->Unbind();
+		cubeEntity.GetMesh()->Bind();
+		cubeEntity.GetMesh()->Draw();
+		cubeEntity.GetMesh()->Unbind();
 
 		shaderProgram.Unbind();
 
