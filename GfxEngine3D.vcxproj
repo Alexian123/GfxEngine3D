@@ -159,6 +159,7 @@
     <ClInclude Include="WindowManager.h" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="Res\Shaders\light_source.frag" />
     <None Include="Res\Shaders\shader.frag" />
     <None Include="Res\Shaders\shader.vert" />
   </ItemGroup>

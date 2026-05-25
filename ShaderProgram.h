@@ -2,6 +2,7 @@
 
 #include "Texture.h"
 
+#include <glm/vec3.hpp>
 #include <glm/mat4x4.hpp>
 
 #include <string>
@@ -19,6 +20,7 @@ public:
 	void SetUniform(const std::string& name, float value);
 	void SetUniform(const std::string& name, int value);
 	void SetUniform(const std::string& name, bool value);
+	void SetUniform(const std::string& name, const glm::vec3& value);
 	void SetUniform(const std::string& name, const glm::mat4& value);
 
 	void SetDefaultVertexAttribute(int index, float x, float y) const;
