@@ -1,9 +1,16 @@
 #pragma once
 
+#include <vector>
+
 class Texture
 {
 public:
-	Texture(const char* path);
+	Texture(
+		int width, 
+		int height, 
+		int channels,
+		const std::vector<unsigned char>& data
+	);
 	~Texture();
 
 	unsigned int GetID() const { return m_id; }

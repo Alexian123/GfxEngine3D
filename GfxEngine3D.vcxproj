@@ -138,19 +138,24 @@
     <ClCompile Include="InputManager.cpp" />
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="Mesh.cpp" />
+    <ClCompile Include="MeshLoader.cpp" />
     <ClCompile Include="ShaderProgram.cpp" />
     <ClCompile Include="Texture.cpp" />
+    <ClCompile Include="TextureLoader.cpp" />
     <ClCompile Include="Thirdparty\Source\glad.c" />
     <ClCompile Include="WindowManager.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="CubeMeshData.h" />
     <ClInclude Include="FlyCamera.h" />
     <ClInclude Include="ICamera.h" />
     <ClInclude Include="GLBuffer.h" />
     <ClInclude Include="InputManager.h" />
     <ClInclude Include="Mesh.h" />
+    <ClInclude Include="MeshLoader.h" />
     <ClInclude Include="ShaderProgram.h" />
     <ClInclude Include="Texture.h" />
+    <ClInclude Include="TextureLoader.h" />
     <ClInclude Include="WindowManager.h" />
   </ItemGroup>
   <ItemGroup>

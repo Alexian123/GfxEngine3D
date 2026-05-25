@@ -141,6 +141,8 @@ void WindowManager::Init(int width, int height, const char* title)
 	glfwSetMouseButtonCallback(m_window, mouse_button_callback);
 	glfwSetScrollCallback(m_window, scroll_callback);
 
+	m_width = width;
+	m_height = height;
 	m_initialized = true;
 }
 

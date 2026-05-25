@@ -1,5 +1,6 @@
 #include <iostream>
 #include <chrono>
+#include <memory>
 
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/vec3.hpp>
@@ -11,6 +12,8 @@
 #include "Mesh.h"
 #include "Texture.h"
 #include "FlyCamera.h"
+#include "MeshLoader.h"
+#include "TextureLoader.h"
 
 int main() {
 	WindowManager& windowManager = WindowManager::GetInstance();
@@ -21,17 +24,14 @@ int main() {
 	InputManager& inputManager = InputManager::GetInstance();
 
 	ShaderProgram shaderProgram("./Res/Shaders/shader.vert", "./Res/Shaders/shader.frag");
-	shaderProgram.SetDefaultVertexAttribute(1, 1.0f, 1.0f, 1.0f);	// default color white
+	//shaderProgram.SetDefaultVertexAttribute(1, 1.0f, 1.0f, 1.0f);	// default color white
 
-	float vertices[] = { -0.5f, -0.5f, -0.5f, 0.0f, 0.0f, 0.5f, -0.5f, -0.5f, 1.0f, 0.0f, 0.5f, 0.5f, -0.5f, 1.0f, 1.0f, 0.5f, 0.5f, -0.5f, 1.0f, 1.0f, -0.5f, 0.5f, -0.5f, 0.0f, 1.0f, -0.5f, -0.5f, -0.5f, 0.0f, 0.0f, -0.5f, -0.5f, 0.5f, 0.0f, 0.0f, 0.5f, -0.5f, 0.5f, 1.0f, 0.0f, 0.5f, 0.5f, 0.5f, 1.0f, 1.0f, 0.5f, 0.5f, 0.5f, 1.0f, 1.0f, -0.5f, 0.5f, 0.5f, 0.0f, 1.0f, -0.5f, -0.5f, 0.5f, 0.0f, 0.0f, -0.5f, 0.5f, 0.5f, 1.0f, 0.0f, -0.5f, 0.5f, -0.5f, 1.0f, 1.0f, -0.5f, -0.5f, -0.5f, 0.0f, 1.0f, -0.5f, -0.5f, -0.5f, 0.0f, 1.0f, -0.5f, -0.5f, 0.5f, 0.0f, 0.0f, -0.5f, 0.5f, 0.5f, 1.0f, 0.0f, 0.5f, 0.5f, 0.5f, 1.0f, 0.0f, 0.5f, 0.5f, -0.5f, 1.0f, 1.0f, 0.5f, -0.5f, -0.5f, 0.0f, 1.0f, 0.5f, -0.5f, -0.5f, 0.0f, 1.0f, 0.5f, -0.5f, 0.5f, 0.0f, 0.0f, 0.5f, 0.5f, 0.5f, 1.0f, 0.0f, -0.5f, -0.5f, -0.5f, 0.0f, 1.0f, 0.5f, -0.5f, -0.5f, 1.0f, 1.0f, 0.5f, -0.5f, 0.5f, 1.0f, 0.0f, 0.5f, -0.5f, 0.5f, 1.0f, 0.0f, -0.5f, -0.5f, 0.5f, 0.0f, 0.0f, -0.5f, -0.5f, -0.5f, 0.0f, 1.0f, -0.5f, 0.5f, -0.5f, 0.0f, 1.0f, 0.5f, 0.5f, -0.5f, 1.0f, 1.0f, 0.5f, 0.5f, 0.5f, 1.0f, 0.0f, 0.5f, 0.5f, 0.5f, 1.0f, 0.0f, -0.5f, 0.5f, 0.5f, 0.0f, 0.0f, -0.5f, 0.5f, -0.5f, 0.0f, 1.0f };
+	MeshLoader& meshLoader = MeshLoader::GetInstance();
+	std::shared_ptr<Mesh> cube = meshLoader.LoadCube("cube1", Mesh::Position | Mesh::Color | Mesh::TexCoord);
 
-	Mesh rect(
-		std::vector<float>(std::begin(vertices), std::end(vertices)),
-		Mesh::TexCoord
-	);
-
-	Texture brickTexture("./Res/Textures/brick_texture.png");
-	Texture patternTexture("./Res/Textures/pattern_texture.png");
+	TextureLoader& textureLoader = TextureLoader::GetInstance();
+	std::shared_ptr<Texture> brickTexture = textureLoader.LoadTexture("brick", "./Res/Textures/brick_texture.png");
+	std::shared_ptr<Texture> patternTexture = textureLoader.LoadTexture("pattern", "./Res/Textures/pattern_texture.png");
 
 	glm::vec3 position = glm::vec3(0.0f);
 	glm::vec3 rotation = glm::vec3(0.0f, 45.0f, 0.0f); // degrees: pitch, yaw, roll
@@ -42,7 +42,7 @@ int main() {
 		* glm::rotate(glm::mat4(1.0f), glm::radians(rotation.z), glm::vec3(0, 0, 1))
 		* glm::scale(glm::mat4(1.0f), scale);
 
-	FlyCamera camera(45.0f, 800.0f / 600.0f, 0.1f, 100.0f);
+	FlyCamera camera(45.0f, windowManager.GetAspectRatio(), 0.1f, 100.0f);
 
 	glEnable(GL_DEPTH_TEST);
 
@@ -102,12 +102,12 @@ int main() {
 		shaderProgram.SetUniform("uView", camera.GetViewMatrix());
 		shaderProgram.SetUniform("uProjection", camera.GetProjectionMatrix());
 
-		brickTexture.Bind(0);
-		patternTexture.Bind(1);
+		brickTexture->Bind(0);
+		patternTexture->Bind(1);
 
-		rect.Bind();
-		rect.Draw();
-		rect.Unbind();
+		cube->Bind();
+		cube->Draw();
+		cube->Unbind();
 
 		shaderProgram.Unbind();
 

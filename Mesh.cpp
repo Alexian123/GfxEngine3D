@@ -2,8 +2,8 @@
 
 #include <glad/glad.h>
 
-Mesh::Mesh(const std::vector<float>& vertices, const std::vector<unsigned int>& indices, unsigned int components)
-	: m_indexCount(indices.size())
+Mesh::Mesh(const std::vector<VertexData>& vertices, const std::vector<unsigned int>& indices, unsigned int attributes)
+	: m_indexCount(indices.size()), m_attributes(attributes)
 {
 	// create VAO
 	glGenVertexArrays(1, &m_VAO);
@@ -11,49 +11,40 @@ Mesh::Mesh(const std::vector<float>& vertices, const std::vector<unsigned int>& 
 	Bind();
 
 	// create VBO
-	m_VBO.WriteData(vertices.data(), vertices.size() * sizeof(float), GL_STATIC_DRAW);
+	std::vector<float> vertexBuffer = BuildVertexBuffer(vertices, attributes);
+	m_VBO.WriteData(vertexBuffer.data(), vertexBuffer.size() * sizeof(float), GL_STATIC_DRAW);
 
 	// calculate stride and vertex count
-	int stride = 3; // position
-	if (components & Color) {
-		stride += 3;
-	}
-	if (components & TexCoord) {
-		stride += 2;
-	}
-	if (components & Normal) {
-		stride += 3;
-	}
-	stride *= sizeof(float);
-	m_vertexCount = vertices.size() / (stride / sizeof(float));	// size / floats per vertex
-	int offset = 0;
+	unsigned int stride = CalculateStride(attributes);
+	m_vertexCount = vertices.size();
+	unsigned int offset = 0;
 
 	// position attribute
 	setVertexAttribute(0, 3, GL_FLOAT, GL_FALSE, stride, offset);
-	offset += 3 * sizeof(float);
+	offset += sizeof(VertexData::position);
 
 	// color attribute
-	if (components & Color) {
+	if (attributes & Color) {
 		setVertexAttribute(1, 3, GL_FLOAT, GL_FALSE, stride, offset);
-		offset += 3 * sizeof(float);
+		offset += sizeof(VertexData::color);
 	}
 	else {
 		disableVertexAttibute(1);
 	}
 
 	// tex coord attribute
-	if (components & TexCoord) {
+	if (attributes & TexCoord) {
 		setVertexAttribute(2, 2, GL_FLOAT, GL_FALSE, stride, offset);
-		offset += 2 * sizeof(float);
+		offset += sizeof(VertexData::texCoord);
 	}
 	else {
 		disableVertexAttibute(2);
 	}
 
 	// normal attribute
-	if (components & Normal) {
+	if (attributes & Normal) {
 		setVertexAttribute(3, 3, GL_FLOAT, GL_FALSE, stride, offset);
-		offset += 3 * sizeof(float);
+		offset += sizeof(VertexData::normal);
 	}
 	else {
 		disableVertexAttibute(3);
@@ -67,8 +58,8 @@ Mesh::Mesh(const std::vector<float>& vertices, const std::vector<unsigned int>& 
 	Unbind();
 }
 
-Mesh::Mesh(const std::vector<float>& vertices, unsigned int components)
-	: Mesh(vertices, std::vector<unsigned int>(), components)	// empty indices vector
+Mesh::Mesh(const std::vector<VertexData>& vertices, unsigned int attributes)
+	: Mesh(vertices, std::vector<unsigned int>(), attributes)	// empty indices vector
 {
 }
 
@@ -95,6 +86,37 @@ void Mesh::Draw() const
 	else {
 		glDrawArrays(GL_TRIANGLES, 0, m_vertexCount);
 	}
+}
+
+std::vector<float> Mesh::BuildVertexBuffer(const std::vector<VertexData>& vertices, unsigned int attributes) const
+{
+	std::vector<float> vertexBuffer;
+	for (const auto& vertex : vertices) {
+		// position
+		vertexBuffer.insert(vertexBuffer.end(), std::begin(vertex.position), std::end(vertex.position));
+		// color
+		if (attributes & Color) {
+			vertexBuffer.insert(vertexBuffer.end(), std::begin(vertex.color), std::end(vertex.color));
+		}
+		// tex coord
+		if (attributes & TexCoord) {
+			vertexBuffer.insert(vertexBuffer.end(), std::begin(vertex.texCoord), std::end(vertex.texCoord));
+		}
+		// normal
+		if (attributes & Normal) {
+			vertexBuffer.insert(vertexBuffer.end(), std::begin(vertex.normal), std::end(vertex.normal));
+		}
+	}
+	return vertexBuffer;
+}
+
+unsigned int Mesh::CalculateStride(unsigned int attributes) const
+{
+	unsigned int stride = 3;
+	if (attributes & Color)    stride += 3;
+	if (attributes & TexCoord) stride += 2;
+	if (attributes & Normal)   stride += 3;
+	return stride * sizeof(float);
 }
 
 void Mesh::setVertexAttribute(

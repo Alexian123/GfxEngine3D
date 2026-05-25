@@ -24,6 +24,7 @@ public:
 	void SetWindowShouldClose() const;
 
 	auto GetWindowDimensions() const { return std::make_pair(m_width, m_height); }
+	float GetAspectRatio() const { return static_cast<float>(m_width) / m_height; }
 
 protected:
 	WindowManager();

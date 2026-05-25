@@ -2,12 +2,12 @@
 
 #include <glad/glad.h>
 
-#define STB_IMAGE_IMPLEMENTATION
-#include <stb/stb_image.h>
-
-#include <iostream>
-
-Texture::Texture(const char* path)
+Texture::Texture(
+	int width,
+	int height,
+	int channels,
+	const std::vector<unsigned char>& data
+) : m_width(width), m_height(height), m_channels(channels)
 {
 	// create texture object and set parameters
 	glGenTextures(1, &m_id);
@@ -17,27 +17,19 @@ Texture::Texture(const char* path)
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-	// read image data and generate texture
-	stbi_set_flip_vertically_on_load(true);
-	unsigned char* data = stbi_load(path, &m_width, &m_height, &m_channels, 0);
-	if (!data) {
-		std::cerr << "ERROR::TEXTURE::FAILED_TO_LOAD\n" << stbi_failure_reason() << std::endl;
+	// generate texture
+	GLenum format = 0;
+	switch (m_channels)
+	{
+	case 1: format = GL_RED;  break;
+	case 3: format = GL_RGB;  break;
+	case 4: format = GL_RGBA; break;
+	default:
+		format = GL_RGB;
 	}
-	else {
-		GLenum format = 0;
-		switch (m_channels)
-		{
-		case 1: format = GL_RED;  break;
-		case 3: format = GL_RGB;  break;
-		case 4: format = GL_RGBA; break;
-		default:
-			format = GL_RGB;
-		}
-		glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-		glTexImage2D(GL_TEXTURE_2D, 0, format, m_width, m_height, 0, format, GL_UNSIGNED_BYTE, data);
-		glGenerateMipmap(GL_TEXTURE_2D);
-	}
-	stbi_image_free(data);
+	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+	glTexImage2D(GL_TEXTURE_2D, 0, format, m_width, m_height, 0, format, GL_UNSIGNED_BYTE, data.data());
+	glGenerateMipmap(GL_TEXTURE_2D);
 }
 
 Texture::~Texture()
