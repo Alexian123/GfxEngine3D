@@ -35,7 +35,7 @@ int main() {
 	std::shared_ptr<Texture> patternTexture = textureLoader.LoadTexture("pattern", "./Res/Textures/pattern_texture.png");
 
 	glm::vec3 position = glm::vec3(0.0f);
-	glm::vec3 rotation = glm::vec3(0.0f, 45.0f, 0.0f);
+	glm::vec3 rotation = glm::vec3(0.0f, 0.0f, 0.0f);
 	glm::vec3 scale = glm::vec3(1.0f);
 	glm::mat4 cubeModelMatrix = glm::translate(glm::mat4(1.0f), position)
 		* glm::rotate(glm::mat4(1.0f), glm::radians(rotation.y), glm::vec3(0, 1, 0))		// YXZ rotation
@@ -110,10 +110,15 @@ int main() {
 		shaderProgram.SetUniform("uView", camera.GetViewMatrix());
 		shaderProgram.SetUniform("uProjection", camera.GetProjectionMatrix());
 		shaderProgram.SetUniform("uNormal", cubeNormalMatrix);
-		shaderProgram.SetUniform("uLightColor", glm::vec3(1.0f));
-		shaderProgram.SetUniform("uObjectColor", glm::vec3(1.0f, 0.5f, 0.31f));
-		shaderProgram.SetUniform("uLightPos", lightPos);
 		shaderProgram.SetUniform("uViewPos", camera.GetPosition());
+		shaderProgram.SetUniform("uMaterial.ambient", glm::vec3(1.0f, 0.5f, 0.31f));
+		shaderProgram.SetUniform("uMaterial.diffuse", glm::vec3(1.0f, 0.5f, 0.31f));
+		shaderProgram.SetUniform("uMaterial.specular", glm::vec3(0.5f, 0.5f, 0.5f));
+		shaderProgram.SetUniform("uMaterial.shininess", 32.0f);
+		shaderProgram.SetUniform("uLights[0].position", lightPos);
+		shaderProgram.SetUniform("uLights[0].ambient", glm::vec3(0.2f, 0.2f, 0.2f));
+		shaderProgram.SetUniform("uLights[0].diffuse", glm::vec3(0.5f, 0.5f, 0.5f)); // darkened
+		shaderProgram.SetUniform("uLights[0].specular", glm::vec3(1.0f, 1.0f, 1.0f));
 
 		brickTexture->Bind(0);
 		patternTexture->Bind(1);
