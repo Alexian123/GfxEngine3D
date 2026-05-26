@@ -39,15 +39,17 @@ namespace GfxEngine3D
 		glDeleteTextures(1, &m_id);
 	}
 
-	void Texture::Bind(int slot) const
+	void Texture::Bind(unsigned int slot) const
 	{
-		slot = std::max(0, std::min(slot, 15));	// clamp slot to [0, 15]
+		slot = std::min(slot, 15U);	// clamp slot to [0, 15]
 		glActiveTexture(GL_TEXTURE0 + slot);
 		glBindTexture(GL_TEXTURE_2D, m_id);
 	}
 
-	void Texture::Unbind() const
+	void Texture::Unbind(unsigned int slot) const
 	{
+		slot = std::min(slot, 15U);	// clamp slot to [0, 15]
+		glActiveTexture(GL_TEXTURE0 + slot);
 		glBindTexture(GL_TEXTURE_2D, 0);
 	}
 }

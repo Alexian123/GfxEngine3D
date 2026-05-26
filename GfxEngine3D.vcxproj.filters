@@ -103,13 +103,13 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="Res\Shaders\shader.frag">
+    <None Include="Res\Shaders\entity_shader.frag">
       <Filter>Resource Files</Filter>
     </None>
-    <None Include="Res\Shaders\shader.vert">
+    <None Include="Res\Shaders\entity_shader.vert">
       <Filter>Resource Files</Filter>
     </None>
-    <None Include="Res\Shaders\light_source.frag">
+    <None Include="Res\Shaders\light_source_shader.frag">
       <Filter>Resource Files</Filter>
     </None>
   </ItemGroup>

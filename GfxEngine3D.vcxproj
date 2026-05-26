@@ -165,9 +165,9 @@
     <ClInclude Include="WindowManager.h" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Res\Shaders\light_source.frag" />
-    <None Include="Res\Shaders\shader.frag" />
-    <None Include="Res\Shaders\shader.vert" />
+    <None Include="Res\Shaders\light_source_shader.frag" />
+    <None Include="Res\Shaders\entity_shader.frag" />
+    <None Include="Res\Shaders\entity_shader.vert" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Res\**\*">

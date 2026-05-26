@@ -20,8 +20,8 @@ namespace GfxEngine3D
 		int GetHeight() const { return m_height; }
 		int GetChannels() const { return m_channels; }
 
-		void Bind(int slot) const;
-		void Unbind() const;
+		void Bind(unsigned int slot) const;
+		void Unbind(unsigned int slot) const;
 
 		Texture(const Texture&) = delete;
 		Texture& operator=(const Texture&) = delete;
