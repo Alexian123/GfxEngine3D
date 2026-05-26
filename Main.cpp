@@ -51,14 +51,14 @@ int main() {
 	std::vector<std::shared_ptr<LightSource>> lights = {
 		std::make_shared<LightSource>(
 			glm::vec3(1.2f, 1.0f, 2.0f),
-			glm::vec3(0.2f, 0.2f, 0.2f),
-			glm::vec3(0.5f, 0.5f, 0.5f),
+			glm::vec3(0.05f, 0.05f, 0.05f),
+			glm::vec3(0.8f, 0.8f, 0.8f),
 			glm::vec3(1.0f, 1.0f, 1.0f)
 		), 
 		std::make_shared<LightSource>(
 			glm::vec3(1.0f, 2.0f, 2.0f),
-			glm::vec3(0.2f, 0.2f, 0.2f),
-			glm::vec3(0.5f, 0.5f, 0.5f),
+			glm::vec3(0.05f, 0.05f, 0.05f),
+			glm::vec3(0.8f, 0.8f, 0.8f),
 			glm::vec3(1.0f, 1.0f, 1.0f)
 		) 
 	};
@@ -71,6 +71,8 @@ int main() {
 
 	glEnable(GL_DEPTH_TEST);
 
+	unsigned int numLightsMask = (lights.size() & 0xFFu) | (static_cast<unsigned long long>((1 & 0xFFu)) << 8);
+		
 	// render loop
 	auto lastTime = std::chrono::high_resolution_clock::now();
 	auto currentTime = lastTime;
@@ -130,15 +132,41 @@ int main() {
 		entityShader.SetUniform("uMaterial.specular", 1);
 		entityShader.SetUniform("uMaterial.emission", 2);
 		entityShader.SetUniform("uMaterial.shininess", crate.GetMaterial()->GetShininess());
-		entityShader.SetUniform("uNumLights", static_cast<int>(lights.size()));
 
-		for (size_t i = 0; i < lights.size(); i++) {
-			std::string lightUniformName = "uLights[" + std::to_string(i) + "]";
+		// directional light
+		entityShader.SetUniform("uDirLight.direction", glm::vec3(-0.2f, -1.0f, -0.3f));
+		entityShader.SetUniform("uDirLight.color.ambient", glm::vec3(0.05f, 0.05f, 0.05f));
+		entityShader.SetUniform("uDirLight.color.diffuse", glm::vec3(0.4f, 0.4f, 0.4f));
+		entityShader.SetUniform("uDirLight.color.specular", glm::vec3(0.5f, 0.5f, 0.5f));
+
+		// point lights
+		for (size_t i = 0; i < lights.size(); ++i) {
+			std::string lightUniformName = "uPointLights[" + std::to_string(i) + "]";
 			entityShader.SetUniform(lightUniformName + ".position", lights[i]->GetPosition());
-			entityShader.SetUniform(lightUniformName + ".ambient", lights[i]->GetAmbient());
-			entityShader.SetUniform(lightUniformName + ".diffuse", lights[i]->GetDiffuse());
-			entityShader.SetUniform(lightUniformName + ".specular", lights[i]->GetSpecular());
+			entityShader.SetUniform(lightUniformName + ".constant", 1.0f);
+			entityShader.SetUniform(lightUniformName + ".linear", 0.09f);
+			entityShader.SetUniform(lightUniformName + ".quadratic", 0.032f);
+			entityShader.SetUniform(lightUniformName + ".color.ambient", lights[i]->GetAmbient());
+			entityShader.SetUniform(lightUniformName + ".color.diffuse", lights[i]->GetDiffuse());
+			entityShader.SetUniform(lightUniformName + ".color.specular", lights[i]->GetSpecular());
 		}
+
+		// spot lights
+		for (size_t i = 0; i < 1; ++i) {
+			std::string lightUniformName = "uSpotLights[" + std::to_string(i) + "]";
+			entityShader.SetUniform(lightUniformName + ".direction", camera.GetFront());
+			entityShader.SetUniform(lightUniformName + ".cutOff", glm::cos(glm::radians(12.5f)));
+			entityShader.SetUniform(lightUniformName + ".outerCutOff", glm::cos(glm::radians(15.0f)));
+			entityShader.SetUniform(lightUniformName + ".pl.position", camera.GetPosition());
+			entityShader.SetUniform(lightUniformName + ".pl.constant", 1.0f);
+			entityShader.SetUniform(lightUniformName + ".pl.linear", 0.09f);
+			entityShader.SetUniform(lightUniformName + ".pl.quadratic", 0.032f);
+			entityShader.SetUniform(lightUniformName + ".pl.color.ambient", glm::vec3(0.0f, 0.0f, 0.0f));
+			entityShader.SetUniform(lightUniformName + ".pl.color.diffuse", glm::vec3(1.0f, 1.0f, 1.0f));
+			entityShader.SetUniform(lightUniformName + ".pl.color.specular", glm::vec3(1.0f, 1.0f, 1.0f));
+		}
+
+		entityShader.SetUniform("uNumLightsMask", numLightsMask);
 
 		crate.GetMaterial()->GetDiffuse()->Bind(0);
 		crate.GetMaterial()->GetSpecular()->Bind(1);

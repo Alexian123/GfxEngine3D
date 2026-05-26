@@ -17,6 +17,10 @@ namespace GfxEngine3D
 		const glm::mat4& GetProjectionMatrix() override;
 
 		const glm::vec3& GetPosition() const { return m_position; }
+		const glm::vec3& GetFront() const { return m_front; }
+		const glm::vec3& GetUp() const { return m_up; }
+		const glm::vec3& GetRight() const { return m_right; }
+
 		float GetFOV() const { return m_fov; }
 		float GetAspectRatio() const { return m_aspectRatio; }
 		float GetNearPlane() const { return m_nearPlane; }
