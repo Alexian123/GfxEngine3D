@@ -1,12 +1,12 @@
 #pragma once
 
-#include "Texture.h"
-
 #include <glm/vec3.hpp>
 #include <glm/mat4x4.hpp>
 
 #include <string>
+#include <filesystem>
 #include <unordered_map>
+#include <unordered_set>
 
 namespace GfxEngine3D
 {
@@ -40,6 +40,14 @@ namespace GfxEngine3D
 
 		unsigned int CompileShader(unsigned int type, const char* source);
 		int GetUniformLocation(const std::string& name);
+
+		static std::string PreprocessShader(const std::string& path);
+		static std::string ReadFile(const std::string& path);
+		static std::string ProcessIncludes(
+			const std::string& source,
+			const std::filesystem::path& currentDir,
+			std::unordered_set<std::string>& includedFiles
+		);
 	};
 }
 

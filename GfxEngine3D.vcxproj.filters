@@ -112,5 +112,8 @@
     <None Include="Res\Shaders\light_source_shader.frag">
       <Filter>Resource Files</Filter>
     </None>
+    <None Include="Res\Shaders\common\lighting.glsl">
+      <Filter>Resource Files</Filter>
+    </None>
   </ItemGroup>
 </Project>

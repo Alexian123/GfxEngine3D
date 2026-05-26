@@ -11,28 +11,15 @@ namespace GfxEngine3D
 {
 	ShaderProgram::ShaderProgram(const char* vertexShaderPath, const char* fragmentShaderPath)
 	{
-		std::ifstream vertexShaderFile;
-		std::ifstream fragmentShaderFile;
 		std::string vertexShaderSource;
 		std::string fragmentShaderSource;
 
-		// ensure ifstream objects can throw exceptions
-		vertexShaderFile.exceptions(std::ifstream::failbit | std::ifstream::badbit);
-		fragmentShaderFile.exceptions(std::ifstream::failbit | std::ifstream::badbit);
-
 		// read shader source code from files
 		try {
-			vertexShaderFile.open(vertexShaderPath);
-			fragmentShaderFile.open(fragmentShaderPath);
-			std::stringstream vertexShaderStream, fragmentShaderStream;
-			vertexShaderStream << vertexShaderFile.rdbuf();
-			fragmentShaderStream << fragmentShaderFile.rdbuf();
-			vertexShaderFile.close();
-			fragmentShaderFile.close();
-			vertexShaderSource = vertexShaderStream.str();
-			fragmentShaderSource = fragmentShaderStream.str();
+			vertexShaderSource = PreprocessShader(vertexShaderPath);
+			fragmentShaderSource = PreprocessShader(fragmentShaderPath);
 		}
-		catch (std::ifstream::failure& e) {
+		catch (std::exception& e) {
 			std::cerr << "ERROR::SHADER::FILE_NOT_SUCCESFULLY_READ\n" << e.what() << std::endl;
 			// TODO: use default hardcoded shaders
 		}
@@ -145,5 +132,85 @@ namespace GfxEngine3D
 			m_uniformLocationCache[name] = glGetUniformLocation(m_id, name.c_str());
 		}
 		return m_uniformLocationCache[name];
+	}
+
+	std::string ShaderProgram::PreprocessShader(const std::string& path)
+	{
+		std::unordered_set<std::string> includedFiles;
+
+		std::filesystem::path filePath = std::filesystem::canonical(path);
+		std::string source = ReadFile(filePath.string());
+
+		return ProcessIncludes(
+			source,
+			filePath.parent_path(),
+			includedFiles
+		);
+	}
+
+	std::string ShaderProgram::ReadFile(const std::string& path)
+	{
+		std::ifstream file(path);
+		if (!file.is_open())
+			throw std::runtime_error("Failed to open shader file: " + path);
+
+		std::stringstream ss;
+		ss << file.rdbuf();
+		return ss.str();
+	}
+
+	std::string ShaderProgram::ProcessIncludes(
+		const std::string& source, 
+		const std::filesystem::path& currentDir, 
+		std::unordered_set<std::string>& includedFiles
+	)
+	{
+		std::stringstream input(source);
+		std::stringstream output;
+
+		std::string line;
+
+		while (std::getline(input, line))
+		{
+			std::string trimmed = line;
+
+			// left trim
+			trimmed.erase(0, trimmed.find_first_not_of(" \t"));
+
+			if (trimmed.rfind("#include", 0) == 0)
+			{
+				size_t firstQuote = line.find('"');
+				size_t lastQuote = line.rfind('"');
+
+				if (firstQuote == std::string::npos || lastQuote == std::string::npos || firstQuote == lastQuote)
+					throw std::runtime_error("Invalid #include syntax: " + line);
+
+				std::string includePath = line.substr(firstQuote + 1, lastQuote - firstQuote - 1);
+
+				std::filesystem::path fullPath = currentDir / includePath;
+				fullPath = std::filesystem::canonical(fullPath);
+
+				std::string key = fullPath.string();
+
+				if (includedFiles.find(key) != includedFiles.end())
+					continue;
+
+				includedFiles.insert(key);
+
+				std::string includedSource = ReadFile(key);
+
+				output << ProcessIncludes(
+					includedSource,
+					fullPath.parent_path(),
+					includedFiles
+				);
+			}
+			else
+			{
+				output << line << '\n';
+			}
+		}
+
+		return output.str();
 	}
 }
