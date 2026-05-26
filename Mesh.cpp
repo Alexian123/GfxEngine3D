@@ -25,18 +25,9 @@ namespace GfxEngine3D
 		setVertexAttribute(0, 3, GL_FLOAT, GL_FALSE, stride, offset);
 		offset += sizeof(VertexData::position);
 
-		// color attribute
-		if (attributes & Color) {
-			setVertexAttribute(1, 3, GL_FLOAT, GL_FALSE, stride, offset);
-			offset += sizeof(VertexData::color);
-		}
-		else {
-			disableVertexAttibute(1);
-		}
-
 		// tex coord attribute
 		if (attributes & TexCoord) {
-			setVertexAttribute(2, 2, GL_FLOAT, GL_FALSE, stride, offset);
+			setVertexAttribute(1, 2, GL_FLOAT, GL_FALSE, stride, offset);
 			offset += sizeof(VertexData::texCoord);
 		}
 		else {
@@ -45,7 +36,7 @@ namespace GfxEngine3D
 
 		// normal attribute
 		if (attributes & Normal) {
-			setVertexAttribute(3, 3, GL_FLOAT, GL_FALSE, stride, offset);
+			setVertexAttribute(2, 3, GL_FLOAT, GL_FALSE, stride, offset);
 			offset += sizeof(VertexData::normal);
 		}
 		else {
@@ -96,10 +87,6 @@ namespace GfxEngine3D
 		for (const auto& vertex : vertices) {
 			// position
 			vertexBuffer.insert(vertexBuffer.end(), std::begin(vertex.position), std::end(vertex.position));
-			// color
-			if (attributes & Color) {
-				vertexBuffer.insert(vertexBuffer.end(), std::begin(vertex.color), std::end(vertex.color));
-			}
 			// tex coord
 			if (attributes & TexCoord) {
 				vertexBuffer.insert(vertexBuffer.end(), std::begin(vertex.texCoord), std::end(vertex.texCoord));
@@ -115,7 +102,6 @@ namespace GfxEngine3D
 	unsigned int Mesh::CalculateStride(unsigned int attributes) const
 	{
 		unsigned int stride = 3;
-		if (attributes & Color)    stride += 3;
 		if (attributes & TexCoord) stride += 2;
 		if (attributes & Normal)   stride += 3;
 		return stride * sizeof(float);

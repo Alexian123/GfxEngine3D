@@ -9,7 +9,6 @@ namespace GfxEngine3D
 	struct VertexData
 	{
 		float position[3];
-		float color[3];
 		float texCoord[2];
 		float normal[3];
 	};
@@ -21,9 +20,8 @@ namespace GfxEngine3D
 		{
 			// in order of attributes in vertex data
 			Position = 0x0,
-			Color = 0x1,
-			TexCoord = 0x2,
-			Normal = 0x4
+			TexCoord = 0x1,
+			Normal = 0x2
 		};
 
 		Mesh(const std::vector<VertexData>& vertices, const std::vector<unsigned int>& indices, unsigned int attributes = Position);

@@ -4,17 +4,14 @@
 
 namespace GfxEngine3D
 {
-	Entity::Entity(
-		const std::shared_ptr<Mesh>& mesh, 
-		const std::shared_ptr<Texture>& texture, 
-		const std::shared_ptr<Material>& material
-	) : m_id(GetNextID()), m_mesh(mesh), m_texture(texture), m_material(material)
+	Entity::Entity(const std::shared_ptr<Mesh>& mesh, const std::shared_ptr<Material>& material
+	) : m_id(GetNextID()), m_mesh(mesh), m_material(material)
 	{
 		UpdateMatricesIfNeeded();
 	}
 
 	Entity::Entity() 
-		: m_id(GetNextID()), m_mesh(nullptr), m_texture(nullptr), m_material(nullptr)
+		: m_id(GetNextID()), m_mesh(nullptr), m_material(nullptr)
 	{
 		UpdateMatricesIfNeeded();
 	}

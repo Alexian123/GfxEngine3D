@@ -30,11 +30,6 @@ namespace GfxEngine3D
 			vertex.position[0] = CubeMeshData::Positions[i * 3 + 0];
 			vertex.position[1] = CubeMeshData::Positions[i * 3 + 1];
 			vertex.position[2] = CubeMeshData::Positions[i * 3 + 2];
-			if (attributes & Mesh::Color) {
-				vertex.color[0] = CubeMeshData::Colors[i * 3 + 0];
-				vertex.color[1] = CubeMeshData::Colors[i * 3 + 1];
-				vertex.color[2] = CubeMeshData::Colors[i * 3 + 2];
-			}
 			if (attributes & Mesh::TexCoord) {
 				vertex.texCoord[0] = CubeMeshData::TexCoords[i * 2 + 0];
 				vertex.texCoord[1] = CubeMeshData::TexCoords[i * 2 + 1];

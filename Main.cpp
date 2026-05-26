@@ -32,20 +32,19 @@ int main() {
 	ShaderProgram lightSourceShaaderProgram("./Res/Shaders/shader.vert", "./Res/Shaders/light_source.frag");
 
 	MeshLoader& meshLoader = MeshLoader::GetInstance();
-	std::shared_ptr<Mesh> cube = meshLoader.LoadCube("cube1", Mesh::Position | Mesh::Color | Mesh::TexCoord | Mesh::Normal);
+	std::shared_ptr<Mesh> cube = meshLoader.LoadCube("cube1", Mesh::Position | Mesh::TexCoord | Mesh::Normal);
 	std::shared_ptr<Mesh> lightSourceCube = meshLoader.LoadCube("light_source_cube", Mesh::Position);
 
 	TextureLoader& textureLoader = TextureLoader::GetInstance();
 	std::shared_ptr<Texture> brickTexture = textureLoader.LoadTexture("brick", "./Res/Textures/brick_texture.png");
 
 	std::shared_ptr<Material> material1 = std::make_shared<Material>(
-		glm::vec3(1.0f, 0.5f, 0.31f), // ambient
-		glm::vec3(1.0f, 0.5f, 0.31f), // diffuse
-		glm::vec3(0.5f, 0.5f, 0.5f),  // specular
-		32.0f						  // shininess
+		brickTexture,					// diffuse
+		glm::vec3(0.5f, 0.5f, 0.5f),	// specular
+		32.0f							// shininess
 	);
 
-	Entity cubeEntity(cube, brickTexture, material1);
+	Entity cubeEntity(cube, material1);
 
 	std::vector<std::shared_ptr<LightSource>> lights = {
 		std::make_shared<LightSource>(
@@ -120,15 +119,12 @@ int main() {
 		// render cube
 		shaderProgram.Bind();
 
-		shaderProgram.SetUniform("uBrightness", 1.0f);
-		shaderProgram.SetUniform("uTexture", 0);
 		shaderProgram.SetUniform("uModel", cubeEntity.GetModelMatrix());
 		shaderProgram.SetUniform("uView", camera.GetViewMatrix());
 		shaderProgram.SetUniform("uProjection", camera.GetProjectionMatrix());
 		shaderProgram.SetUniform("uNormal", cubeEntity.GetNormalMatrix());
 		shaderProgram.SetUniform("uViewPos", camera.GetPosition());
-		shaderProgram.SetUniform("uMaterial.ambient", cubeEntity.GetMaterial()->GetAmbient());
-		shaderProgram.SetUniform("uMaterial.diffuse", cubeEntity.GetMaterial()->GetDiffuse());
+		shaderProgram.SetUniform("uMaterial.diffuse", 0);
 		shaderProgram.SetUniform("uMaterial.specular", cubeEntity.GetMaterial()->GetSpecular());
 		shaderProgram.SetUniform("uMaterial.shininess", cubeEntity.GetMaterial()->GetShininess());
 		shaderProgram.SetUniform("uNumLights", static_cast<int>(lights.size()));
@@ -141,7 +137,7 @@ int main() {
 			shaderProgram.SetUniform(lightUniformName + ".specular", lights[i]->GetSpecular());
 		}
 
-		cubeEntity.GetTexture()->Bind(0);
+		cubeEntity.GetMaterial()->GetDiffuse()->Bind(0);
 
 		cubeEntity.GetMesh()->Bind();
 		cubeEntity.GetMesh()->Draw();
@@ -149,7 +145,7 @@ int main() {
 
 		shaderProgram.Unbind();
 
-		// render light source cube
+		// render light source cubes
 		lightSourceShaaderProgram.Bind();
 		lightSourceShaaderProgram.SetUniform("uView", camera.GetViewMatrix());
 		lightSourceShaaderProgram.SetUniform("uProjection", camera.GetProjectionMatrix());
