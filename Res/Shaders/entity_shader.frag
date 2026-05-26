@@ -6,6 +6,7 @@ struct Material
 {
 	sampler2D diffuse;
 	sampler2D specular;
+	sampler2D emission;
 	float shininess;
 };
 
@@ -33,8 +34,8 @@ void main()
 	vec3 norm = normalize(vNormal);
 	vec3 viewDir = normalize(uViewPos - vWorldPos);
 
-	vec3 diffuseColor = vec3(texture(uMaterial.diffuse, vTexCoord));
-	vec3 specularColor = vec3(texture(uMaterial.specular, vTexCoord));
+	vec3 diffuseColor = texture(uMaterial.diffuse, vTexCoord).rgb;
+	vec3 specularColor = texture(uMaterial.specular, vTexCoord).rgb;
 
 	vec3 ambient = vec3(0.0);
 	vec3 diffuse = vec3(0.0);
@@ -55,5 +56,7 @@ void main()
 		specular += uLights[i].specular * spec * specularColor;
 	}
 
-	FragColor = vec4(ambient + diffuse + specular, 1.0);
+	vec3 emission = texture(uMaterial.emission, vTexCoord).rgb;
+
+	FragColor = vec4(ambient + diffuse + specular + emission, 1.0);
 };

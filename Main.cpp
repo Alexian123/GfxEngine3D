@@ -35,13 +35,15 @@ int main() {
 	std::shared_ptr<Mesh> cubeMesh = meshLoader.LoadCube("cube", Mesh::Position | Mesh::TexCoord | Mesh::Normal);
 
 	TextureLoader& textureLoader = TextureLoader::GetInstance();
-	std::shared_ptr<Texture> crateDiffuse = textureLoader.LoadTexture("crate", "./Res/Textures/crate.png");
+	std::shared_ptr<Texture> crateDiffuse = textureLoader.LoadTexture("crate_diffuse", "./Res/Textures/crate.png");
 	std::shared_ptr<Texture> crateSpecular = textureLoader.LoadTexture("crate_specular", "./Res/Textures/crate_specular.png");
+	std::shared_ptr<Texture> crateEmission = textureLoader.LoadTexture("crate_emission", "./Res/Textures/matrix.jpg");
 
 	std::shared_ptr<Material> crateMaterial = std::make_shared<Material>(
 		crateDiffuse,	// diffuse
 		crateSpecular,	// specular
-		32.0f			// shininess
+		32.0f,			// shininess
+		crateEmission	// emission
 	);
 
 	Entity crate(cubeMesh, crateMaterial);
@@ -126,6 +128,7 @@ int main() {
 		entityShader.SetUniform("uViewPos", camera.GetPosition());
 		entityShader.SetUniform("uMaterial.diffuse", 0);
 		entityShader.SetUniform("uMaterial.specular", 1);
+		entityShader.SetUniform("uMaterial.emission", 2);
 		entityShader.SetUniform("uMaterial.shininess", crate.GetMaterial()->GetShininess());
 		entityShader.SetUniform("uNumLights", static_cast<int>(lights.size()));
 
@@ -139,6 +142,7 @@ int main() {
 
 		crate.GetMaterial()->GetDiffuse()->Bind(0);
 		crate.GetMaterial()->GetSpecular()->Bind(1);
+		//crate.GetMaterial()->GetEmission()->Bind(2);
 
 		crate.GetMesh()->Bind();
 		crate.GetMesh()->Draw();
