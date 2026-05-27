@@ -67,12 +67,12 @@ namespace GfxEngine3D
 		glUniform1f(GetUniformLocation(name), value);
 	}
 
-	void ShaderProgram::SetUniform(const std::string& name, int value)
+	void ShaderProgram::SetUniform(const std::string& name, int32_t value)
 	{
 		glUniform1i(GetUniformLocation(name), value);
 	}
 
-	void ShaderProgram::SetUniform(const std::string& name, unsigned int value)
+	void ShaderProgram::SetUniform(const std::string& name, uint32_t value)
 	{
 		glUniform1ui(GetUniformLocation(name), value);
 	}

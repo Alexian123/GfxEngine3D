@@ -71,7 +71,9 @@ int main() {
 
 	glEnable(GL_DEPTH_TEST);
 
-	unsigned int numLightsMask = (lights.size() & 0xFFu) | (static_cast<unsigned long long>((1 & 0xFFu)) << 8);
+	uint32_t numLightsMask = static_cast<uint32_t>(1)	// dir lights
+		| ((static_cast<uint32_t>(lights.size()) & 0xFFu) << 8)	// point lights
+		| (static_cast<uint32_t>(1) << 16); // spot lights
 		
 	// render loop
 	auto lastTime = std::chrono::high_resolution_clock::now();
@@ -103,6 +105,11 @@ int main() {
 			camera.RotatePitch(mouseDelta.y * sensitivity);
 		}
 
+		numLightsMask &= 0xFFFF;
+		if (inputManager.IsMouseButtonDown(InputManager::Mouse_Left)) {
+			numLightsMask |= (static_cast<uint32_t>(1) << 16);
+		}
+
 		const float cameraSpeed = 2.5f * deltaTime;
 		if (inputManager.IsKeyDown(InputManager::Key_W))
 			camera.MoveZ(cameraSpeed);
@@ -128,16 +135,19 @@ int main() {
 		entityShader.SetUniform("uProjection", camera.GetProjectionMatrix());
 		entityShader.SetUniform("uNormal", crate.GetNormalMatrix());
 		entityShader.SetUniform("uViewPos", camera.GetPosition());
-		entityShader.SetUniform("uMaterial.diffuse", 0);
-		entityShader.SetUniform("uMaterial.specular", 1);
-		entityShader.SetUniform("uMaterial.emission", 2);
+		entityShader.SetUniform("uMaterial.diffuseMap", 0);
+		entityShader.SetUniform("uMaterial.specularMap", 1);
+		entityShader.SetUniform("uMaterial.emissionMap", 2);
 		entityShader.SetUniform("uMaterial.shininess", crate.GetMaterial()->GetShininess());
 
-		// directional light
-		entityShader.SetUniform("uDirLight.direction", glm::vec3(-0.2f, -1.0f, -0.3f));
-		entityShader.SetUniform("uDirLight.color.ambient", glm::vec3(0.05f, 0.05f, 0.05f));
-		entityShader.SetUniform("uDirLight.color.diffuse", glm::vec3(0.4f, 0.4f, 0.4f));
-		entityShader.SetUniform("uDirLight.color.specular", glm::vec3(0.5f, 0.5f, 0.5f));
+		// directional lights
+		for (size_t i = 0; i < 1; ++i) {
+			std::string lightUniformName = "uDirLights[" + std::to_string(i) + "]";
+			entityShader.SetUniform(lightUniformName + ".direction", glm::vec3(-0.2f, -1.0f, -0.3f));
+			entityShader.SetUniform(lightUniformName + ".color.ambient", glm::vec3(0.05f, 0.05f, 0.05f));
+			entityShader.SetUniform(lightUniformName + ".color.diffuse", glm::vec3(0.4f, 0.4f, 0.4f));
+			entityShader.SetUniform(lightUniformName + ".color.specular", glm::vec3(0.5f, 0.5f, 0.5f));
+		}
 
 		// point lights
 		for (size_t i = 0; i < lights.size(); ++i) {
@@ -170,7 +180,7 @@ int main() {
 
 		crate.GetMaterial()->GetDiffuse()->Bind(0);
 		crate.GetMaterial()->GetSpecular()->Bind(1);
-		//crate.GetMaterial()->GetEmission()->Bind(2);
+		crate.GetMaterial()->GetEmission()->Bind(2);
 
 		crate.GetMesh()->Bind();
 		crate.GetMesh()->Draw();

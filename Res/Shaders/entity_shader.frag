@@ -1,11 +1,10 @@
 #version 330 core
 
 #include "common/lighting.glsl"
-#include "common/lighting.glsl"
-#include "common/lighting.glsl"
 
-#define MAX_NUM_POINT_LIGHTS 10
-#define MAX_NUM_SPOT_LIGHTS 5
+#define MAX_NUM_DIR_LIGHTS  4
+#define MAX_NUM_POINT_LIGHTS 8
+#define MAX_NUM_SPOT_LIGHTS 2
 
 in vec2 vTexCoord;
 in vec3 vNormal;
@@ -15,33 +14,40 @@ out vec4 FragColor;
 
 uniform Material uMaterial;
 uniform vec3 uViewPos;
-uniform DirLight uDirLight;
+uniform DirLight uDirLights[MAX_NUM_DIR_LIGHTS];
 uniform PointLight uPointLights[MAX_NUM_POINT_LIGHTS];
 uniform SpotLight uSpotLights[MAX_NUM_SPOT_LIGHTS];
-uniform uint uNumLightsMask;	// b[0:7] = numPointLights, b[8:15] = numSpotLights
+uniform uint uNumLightsMask; // b[0:7] = numDirLights, b[8:15] = numPointLights, b[16:23] = numSpotLights
 
 void main()
 {
-	vec3 norm = normalize(vNormal);
-	vec3 viewDir = normalize(uViewPos - vWorldPos);
-    uint numPointLights = uNumLightsMask & 0xFFu;
-    uint numSpotLights = (uNumLightsMask >> 8) & 0xFFu;
+    Surface surface = createSurface(uMaterial, vTexCoord, vNormal, vWorldPos, uViewPos);
 
-	// directional lighting
-    vec3 result = calculateDirLight(uDirLight, uMaterial, norm, viewDir, vTexCoord);
+    int numDirLights = int(uNumLightsMask & 0xFFu);
+    int numPointLights = int((uNumLightsMask >> 8) & 0xFFu);
+    int numSpotLights = int((uNumLightsMask >> 16) & 0xFFu);
 
-    // point lights
-    for (int i = 0; i < int(numPointLights); ++i) {
-        result += calculatePointLight(uPointLights[i], uMaterial, norm, vWorldPos, viewDir, vTexCoord);  
-	}
-		
-    // spot lights
-    for (int i = 0; i < int(numSpotLights); ++i) {
-        result += calculateSpotLight(uSpotLights[i], uMaterial, norm, vWorldPos, viewDir, vTexCoord);
+    // directional lights
+    vec3 result = vec3(0.0);
+    for (int i = 0; i < MAX_NUM_DIR_LIGHTS; ++i) {
+        if (i >= numDirLights) break;
+        result += calculateDirLight(uDirLights[i], surface);
     }
 
-	// self light (emission)
-	vec3 emission = texture(uMaterial.emission, vTexCoord).rgb;
+    // point lights
+    for (int i = 0; i < MAX_NUM_POINT_LIGHTS; ++i) {
+        if (i >= numPointLights) break;
+        result += calculatePointLight(uPointLights[i], surface);
+    }
 
-	FragColor = vec4(result + emission, 1.0);
+    // spot lights
+    for (int i = 0; i < MAX_NUM_SPOT_LIGHTS; ++i) {
+        if (i >= numSpotLights) break;
+        result += calculateSpotLight(uSpotLights[i], surface);
+    }
+
+    // self light (emission)
+    result += surface.emissionColor;
+
+    FragColor = vec4(result, 1.0);
 }
