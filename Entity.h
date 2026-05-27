@@ -14,10 +14,11 @@ namespace GfxEngine3D
 	class Entity
 	{
 	public:
-		Entity(const std::shared_ptr<Mesh>& mesh, const std::shared_ptr<Material>& material);
+		Entity(const std::shared_ptr<Mesh>& mesh, const std::shared_ptr<Material>& material = nullptr);
 
 		~Entity() = default;
 
+		Entity() = delete;
 		Entity(const Entity&) = delete;
 		Entity& operator=(const Entity&) = delete;
 
@@ -37,9 +38,6 @@ namespace GfxEngine3D
 		void SetRotation(const glm::vec3& rotation);
 		void SetScale(const glm::vec3& scale);
 		void SetScale(float scale);
-
-	protected:
-		Entity();
 
 	private:
 		unsigned int m_id;

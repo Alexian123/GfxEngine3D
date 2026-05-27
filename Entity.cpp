@@ -10,12 +10,6 @@ namespace GfxEngine3D
 		UpdateMatricesIfNeeded();
 	}
 
-	Entity::Entity() 
-		: m_id(GetNextID()), m_mesh(nullptr), m_material(nullptr)
-	{
-		UpdateMatricesIfNeeded();
-	}
-
 	const glm::mat4& Entity::GetModelMatrix()
 	{
 		UpdateMatricesIfNeeded();

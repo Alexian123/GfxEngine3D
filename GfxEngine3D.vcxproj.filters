@@ -54,9 +54,6 @@
     <ClCompile Include="Material.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="LightSource.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="EntityRenderer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -101,10 +98,10 @@
     <ClInclude Include="Material.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="LightSource.h">
+    <ClInclude Include="EntityRenderer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="EntityRenderer.h">
+    <ClInclude Include="Lights.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
